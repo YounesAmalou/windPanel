@@ -4,6 +4,11 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-svelte'],
+  manifest: {
+    action: {
+      default_title: 'No Tailwind theme variables present on this website',
+    },
+  },
   webExt: {
     startUrls: ['http://localhost:4321/'],
   },
