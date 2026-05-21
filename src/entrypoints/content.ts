@@ -2,40 +2,48 @@ import { mount, unmount } from 'svelte';
 import { get, writable } from 'svelte/store';
 import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import ThemePanel from '../components/ThemePanel.svelte';
-import {
-  THEME_VARIABLES,
-  createEmptyThemeState,
-  cssVariableName,
-  type ThemeMode,
-  type ThemeState,
-  type ThemeVariable,
-} from '../lib/theme';
 import { ACTION_STATUS_MESSAGE, TOGGLE_PANEL_MESSAGE } from '../lib/constant';
+import {
+  cloneThemeDocument,
+  getActiveMode,
+  hasDetectedTheme,
+  setActiveMode,
+  updateModeValue,
+  type ThemeDocument,
+} from '../lib/theme';
+import {
+  applyWebsiteMode,
+  detectThemeDocument,
+  isWindPanelApplyingMode,
+  watchWebsiteThemeChanges,
+} from '../lib/theme-detect';
 
 type ThemePanelInstance = ReturnType<typeof mount>;
-
-let isReadingTheme = false;
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_idle',
   cssInjectionMode: 'ui',
   async main(ctx) {
-    let detectedTheme = detectTheme();
+    let detectedTheme = detectThemeDocument();
     let hasTheme = hasDetectedTheme(detectedTheme);
     let ui: Awaited<ReturnType<typeof createPanelUi>> | undefined;
-    const detectedThemeStore = writable(detectedTheme);
-    const activeMode = writable<ThemeMode>(getInitialMode());
+    const themeDocumentStore = writable(detectedTheme);
+    const activeModeId = writable(detectedTheme.activeModeId);
     const open = writable(false);
 
     reportAvailability(hasTheme);
-    watchForThemeChanges(() => {
-      const nextTheme = detectTheme();
+
+    watchWebsiteThemeChanges(() => {
+      if (isWindPanelApplyingMode()) return;
+
+      const nextTheme = detectThemeDocument();
       const nextHasTheme = hasDetectedTheme(nextTheme);
 
-      if (ui?.mounted) return;
-      detectedTheme = nextTheme;
-      detectedThemeStore.set(detectedTheme);
+      detectedTheme = mergeThemeDocuments(detectedTheme, nextTheme);
+      themeDocumentStore.set(detectedTheme);
+      activeModeId.set(detectedTheme.activeModeId);
+      applyThemeOverride(getActiveMode(detectedTheme).id, detectedTheme);
 
       if (nextHasTheme !== hasTheme) {
         hasTheme = nextHasTheme;
@@ -48,20 +56,25 @@ export default defineContentScript({
 
       void (async () => {
         ui ??= await createPanelUi(ctx, {
-          getDetectedTheme: () => detectedTheme,
-          detectedThemeStore,
-          activeMode,
+          getThemeDocument: () => detectedTheme,
+          themeDocumentStore,
+          activeModeId,
           open,
           setOpen(value) {
             open.set(value);
           },
-          setActiveMode(mode) {
-            activeMode.set(mode);
-            applyWebsiteMode(mode);
+          setActiveMode(modeId) {
+            detectedTheme = setActiveMode(detectedTheme, modeId);
+            themeDocumentStore.set(detectedTheme);
+            activeModeId.set(detectedTheme.activeModeId);
+            applyWebsiteMode(detectedTheme, detectedTheme.activeModeId);
+            applyThemeOverride(detectedTheme.activeModeId, detectedTheme);
           },
           updateTheme(nextTheme) {
-            detectedTheme = nextTheme;
-            detectedThemeStore.set(detectedTheme);
+            detectedTheme = cloneThemeDocument(nextTheme);
+            themeDocumentStore.set(detectedTheme);
+            activeModeId.set(detectedTheme.activeModeId);
+            applyThemeOverride(detectedTheme.activeModeId, detectedTheme);
           },
         });
 
@@ -79,138 +92,55 @@ function reportAvailability(hasTheme: boolean): void {
   });
 }
 
-function watchForThemeChanges(onChange: () => void): void {
-  let timeout: number | undefined;
-  const schedule = () => {
-    if (isReadingTheme) return;
+function applyThemeOverride(modeId: string, theme: ThemeDocument): void {
+  const mode = theme.modes.find((item) => item.id === modeId);
+  if (!mode) return;
 
-    window.clearTimeout(timeout);
-    timeout = window.setTimeout(() => {
-      if (!isReadingTheme) onChange();
-    }, 150);
-  };
+  const targets = [document.documentElement, document.body].filter(Boolean) as HTMLElement[];
 
-  new MutationObserver(schedule).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class', 'style'],
-    childList: true,
-    subtree: true,
-  });
+  for (const target of targets) {
+    for (const variable of theme.variables) {
+      const value = mode.values[variable]?.trim();
+      const property = `--${variable}`;
 
-  if (document.head) {
-    new MutationObserver(schedule).observe(document.head, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-    });
-  }
-}
-
-function detectTheme(): ThemeState {
-  const theme = createEmptyThemeState();
-
-  isReadingTheme = true;
-
-  try {
-    readComputedTheme(theme[getInitialMode()]);
-    readDarkThemeFromProbe(theme.dark);
-  } finally {
-    queueMicrotask(() => {
-      isReadingTheme = false;
-    });
-  }
-
-  return theme;
-}
-
-function readComputedTheme(values: ThemeState[ThemeMode]): void {
-  const rootStyle = getComputedStyle(document.documentElement);
-  const bodyStyle = document.body ? getComputedStyle(document.body) : undefined;
-
-  for (const variable of THEME_VARIABLES) {
-    const name = cssVariableName(variable);
-    values[variable] = bodyStyle?.getPropertyValue(name).trim() || rootStyle.getPropertyValue(name).trim() || '';
-  }
-}
-
-function readDarkThemeFromProbe(values: ThemeState[ThemeMode]): void {
-  if (!document.body) return;
-
-  const probe = document.createElement('div');
-  const child = document.createElement('div');
-
-  probe.className = 'dark';
-  probe.setAttribute('aria-hidden', 'true');
-  probe.style.cssText =
-    'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;visibility:hidden;pointer-events:none;';
-  probe.append(child);
-  document.body.append(probe);
-
-  try {
-    const probeStyle = getComputedStyle(probe);
-    const childStyle = getComputedStyle(child);
-
-    for (const variable of THEME_VARIABLES) {
-      const name = cssVariableName(variable);
-      console.log(name, childStyle.getPropertyValue(name).trim(), probeStyle.getPropertyValue(name).trim())
-      values[variable] =
-        childStyle.getPropertyValue(name).trim() ||
-        probeStyle.getPropertyValue(name).trim() ||
-        values[variable];
-    }
-  } finally {
-    probe.remove();
-  }
-}
-
-function hasDetectedTheme(theme: ThemeState): boolean {
-  return THEME_VARIABLES.some((variable) => theme.light[variable] || theme.dark[variable]);
-}
-
-function getInitialMode(): ThemeMode {
-  return document.documentElement.classList.contains('dark') || document.body?.classList.contains('dark')
-    ? 'dark'
-    : 'light';
-}
-
-function applyWebsiteMode(mode: ThemeMode): void {
-  setDarkClass(document.documentElement, mode === 'dark');
-  if (document.body) setDarkClass(document.body, mode === 'dark');
-}
-
-function setDarkClass(element: Element, enabled: boolean): void {
-  element.classList.toggle('dark', enabled);
-
-  if (!element.getAttribute('class')) {
-    element.removeAttribute('class');
-  }
-}
-
-function applyThemeOverride(mode: ThemeMode, theme: ThemeState): void {
-  if (!document.body) return;
-
-  for (const variable of THEME_VARIABLES) {
-    const value = theme[mode][variable].trim();
-    const property = cssVariableName(variable);
-
-    if (value) {
-      document.body.style.setProperty(property, value);
-    } else {
-      document.body.style.removeProperty(property);
+      if (value) {
+        target.style.setProperty(property, value);
+      } else {
+        target.style.removeProperty(property);
+      }
     }
   }
+}
+
+function mergeThemeDocuments(previous: ThemeDocument, detected: ThemeDocument): ThemeDocument {
+  const next = cloneThemeDocument(detected);
+
+  for (const previousMode of previous.modes) {
+    const nextMode = next.modes.find((mode) => mode.id === previousMode.id);
+    if (!nextMode) continue;
+
+    for (const variable of previous.variables) {
+      const previousValue = previousMode.values[variable]?.trim();
+      if (previousValue && previousValue !== nextMode.values[variable]?.trim()) {
+        nextMode.values[variable] = previousMode.values[variable];
+      }
+    }
+  }
+
+  next.variables = Array.from(new Set([...next.variables, ...previous.variables]));
+  return next;
 }
 
 async function createPanelUi(
   ctx: Parameters<typeof createShadowRootUi>[0],
   state: {
-    getDetectedTheme: () => ThemeState;
-    detectedThemeStore: ReturnType<typeof writable<ThemeState>>;
-    activeMode: ReturnType<typeof writable<ThemeMode>>;
+    getThemeDocument: () => ThemeDocument;
+    themeDocumentStore: ReturnType<typeof writable<ThemeDocument>>;
+    activeModeId: ReturnType<typeof writable<string>>;
     open: ReturnType<typeof writable<boolean>>;
     setOpen: (open: boolean) => void;
-    setActiveMode: (mode: ThemeMode) => void;
-    updateTheme: (theme: ThemeState) => void;
+    setActiveMode: (modeId: string) => void;
+    updateTheme: (theme: ThemeDocument) => void;
   },
 ) {
   return createShadowRootUi<{
@@ -225,28 +155,27 @@ async function createPanelUi(
       const component = mount(ThemePanel, {
         target: container,
         props: {
-          detectedTheme: state.detectedThemeStore,
-          activeMode: state.activeMode,
+          themeDocument: state.themeDocumentStore,
+          activeModeId: state.activeModeId,
           open: state.open,
           onToggleOpen: () => {
-            const nextOpen = !get(state.open);
-            state.setOpen(nextOpen);
+            state.setOpen(!get(state.open));
           },
-          onModeChange: (mode: ThemeMode) => {
-            state.setActiveMode(mode);
-            applyThemeOverride(mode, state.getDetectedTheme());
+          onModeChange: (modeId: string) => {
+            state.setActiveMode(modeId);
           },
-          onVariableChange: (mode: ThemeMode, variable: ThemeVariable, value: string) => {
-            const nextTheme = state.getDetectedTheme();
-            nextTheme[mode][variable] = value;
+          onVariableChange: (modeId: string, variable: string, value: string) => {
+            const nextTheme = updateModeValue(state.getThemeDocument(), modeId, variable, value);
             state.updateTheme(nextTheme);
-            applyThemeOverride(mode, nextTheme);
+          },
+          onThemeDocumentChange: (theme: ThemeDocument) => {
+            state.updateTheme(theme);
           },
         },
       });
 
-      applyWebsiteMode(get(state.activeMode));
-      applyThemeOverride(get(state.activeMode), state.getDetectedTheme());
+      applyWebsiteMode(state.getThemeDocument(), get(state.activeModeId));
+      applyThemeOverride(get(state.activeModeId), state.getThemeDocument());
 
       return { component };
     },

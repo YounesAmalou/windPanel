@@ -14,11 +14,11 @@ The repository currently contains:
 - [x] A background script that enables or disables the browser action based on detection.
 - [x] A Tailwind 4 Astro demo app in `demo/`.
 - [x] A Tailwind 4 shadcn-style theme in `demo/src/styles/global.css`.
-- [ ] A dynamic theme mode model beyond fixed `light` and `dark`.
-- [ ] Reliable active-mode synchronization when the website toggles theme itself.
-- [ ] Persistent custom preset storage.
-- [ ] A raw CSS theme parser/editor.
-- [ ] Automated tests.
+- [x] A dynamic theme mode model beyond fixed `light` and `dark`.
+- [x] Reliable active-mode synchronization when the website toggles theme itself.
+- [x] Persistent custom preset storage.
+- [x] A raw CSS theme parser/editor.
+- [x] Automated tests.
 - [ ] Marketplace publishing setup.
 
 ## 2. Documentation Ground Truth
@@ -32,14 +32,14 @@ Tailwind CSS v4 notes:
 - [x] `@theme inline` can map Tailwind tokens to external CSS variables, such as `--color-background: var(--background)`.
 - [x] Tailwind colors commonly use `oklch(...)`.
 - [x] Dark mode can be customized with `@custom-variant`, including class selectors and data-attribute selectors.
-- [ ] WindPanel must not assume `.dark` is the only possible mode selector.
+- [x] WindPanel must not assume `.dark` is the only possible mode selector.
 
 WXT notes:
 
 - [x] WXT supports Shadow DOM UI injection with `createShadowRootUi`.
 - [x] `cssInjectionMode: 'ui'` is appropriate for injected UI styles.
 - [x] WXT storage supports typed persistent items through `storage.defineItem`.
-- [ ] The extension manifest needs `storage` permission before persistent presets/settings can be saved through extension storage.
+- [x] The extension manifest needs `storage` permission before persistent presets/settings can be saved through extension storage.
 
 ## 3. Current Implementation Scan
 
@@ -52,13 +52,13 @@ WXT notes:
 - [x] `src/entrypoints/content.ts` uses a hidden `.dark` probe to read dark values.
 - [x] `src/entrypoints/content.ts` applies variable overrides to `body.style`.
 - [x] `src/entrypoints/content.ts` toggles `.dark` on both `html` and `body`.
-- [ ] `src/entrypoints/content.ts` currently limits modes to `light | dark`.
-- [ ] `src/entrypoints/content.ts` currently treats `.dark` as the only non-default mode.
-- [ ] `src/entrypoints/content.ts` does not keep `activeMode` synchronized while the panel is mounted.
-- [ ] `src/entrypoints/content.ts` mutates `detectedTheme` in place during variable edits.
-- [ ] `src/entrypoints/content.ts` contains a debug `console.log` in dark-mode probing.
-- [ ] `src/entrypoints/content.ts` does not parse CSS rules to discover available modes.
-- [ ] `src/entrypoints/content.ts` does not support data-attribute theme selectors.
+- [x] `src/entrypoints/content.ts` currently limits modes to `light | dark`.
+- [x] `src/entrypoints/content.ts` currently treats `.dark` as the only non-default mode.
+- [x] `src/entrypoints/content.ts` does not keep `activeMode` synchronized while the panel is mounted.
+- [x] `src/entrypoints/content.ts` mutates `detectedTheme` in place during variable edits.
+- [x] `src/entrypoints/content.ts` contains a debug `console.log` in dark-mode probing.
+- [x] `src/entrypoints/content.ts` does not parse CSS rules to discover available modes.
+- [x] `src/entrypoints/content.ts` does not support data-attribute theme selectors.
 
 ### Panel UI
 
@@ -67,12 +67,12 @@ WXT notes:
 - [x] The variables view has collapsible groups.
 - [x] The variables view has text inputs and a native color input fallback.
 - [x] The theme view currently supports copy and paste.
-- [ ] The theme view is currently JSON-based, but the target behavior is raw CSS.
-- [ ] Presets are currently mock data and are not applied or persisted.
-- [ ] Mode toggle is hard-coded to `light` and `dark`.
-- [ ] Variable grouping does not match the requested groups.
-- [ ] OKLCH editing is not implemented.
-- [ ] Panel animation and shell layout need polish.
+- [x] The theme view is currently JSON-based, but the target behavior is raw CSS.
+- [x] Presets are currently mock data and are not applied or persisted.
+- [x] Mode toggle is hard-coded to `light` and `dark`.
+- [x] Variable grouping does not match the requested groups.
+- [x] OKLCH editing is not implemented.
+- [x] Panel animation and shell layout need polish.
 
 ### Demo
 
@@ -80,9 +80,9 @@ WXT notes:
 - [x] `demo/src/styles/global.css` defines `@theme inline`.
 - [x] `demo/src/styles/global.css` defines `:root` variables and `.dark` variables.
 - [x] `demo/src/styles/global.css` configures `@custom-variant dark (&:is(.dark *));`.
-- [ ] The demo does not yet include UI controls that toggle theme modes from the website itself.
-- [ ] The demo does not yet cover data-attribute modes.
-- [ ] The demo does not yet cover more than two modes.
+- [x] The demo does not yet include UI controls that toggle theme modes from the website itself.
+- [x] The demo does not yet cover data-attribute modes.
+- [x] The demo does not yet cover more than two modes.
 - [ ] The demo does not yet cover malformed pasted themes, missing variables, or selector edge cases.
 
 ## 4. Product Scope
@@ -97,11 +97,11 @@ The panel must:
 
 - [x] Show and hide from the right side.
 - [x] Leave a handle visible when hidden.
-- [ ] Open with a polished animation that feels fast, controlled, and responsive.
-- [ ] Hide with a matching polished animation.
-- [ ] Have rounded edges and margin from the screen edge instead of a full-height hard edge.
-- [ ] Fit desktop and mobile widths without overflowing text or controls.
-- [ ] Respect reduced-motion preferences.
+- [x] Open with a polished animation that feels fast, controlled, and responsive.
+- [x] Hide with a matching polished animation.
+- [x] Have rounded edges and margin from the screen edge instead of a full-height hard edge.
+- [x] Fit desktop and mobile widths without overflowing text or controls.
+- [x] Respect reduced-motion preferences.
 - [ ] Keep panel styles isolated from page styles.
 
 ## 5. Core Concepts
@@ -143,14 +143,14 @@ Examples:
 
 Checklist:
 
-- [ ] Replace `ThemeMode = 'light' | 'dark'` with a dynamic mode identifier.
-- [ ] Add a `default` or `base` mode for `:root`, `html`, and `body` values.
-- [ ] Support discovered modes such as `dark`, `light`, `sepia`, `dim`, `system`, or arbitrary project names.
-- [ ] Store each mode's display label.
-- [ ] Store each mode's selector.
-- [ ] Store each mode's activation target, such as `html.class`, `body.class`, `html[data-theme]`, or `body[data-theme]`.
-- [ ] Store confidence/source metadata for each discovered mode.
-- [ ] Preserve unknown mode selectors in exports.
+- [x] Replace `ThemeMode = 'light' | 'dark'` with a dynamic mode identifier.
+- [x] Add a `default` or `base` mode for `:root`, `html`, and `body` values.
+- [x] Support discovered modes such as `dark`, `light`, `sepia`, `dim`, `system`, or arbitrary project names.
+- [x] Store each mode's display label.
+- [x] Store each mode's selector.
+- [x] Store each mode's activation target, such as `html.class`, `body.class`, `html[data-theme]`, or `body[data-theme]`.
+- [x] Store confidence/source metadata for each discovered mode.
+- [x] Preserve unknown mode selectors in exports.
 
 Suggested model:
 
@@ -181,27 +181,29 @@ Detection should use multiple sources:
 
 - [x] Computed styles on `document.documentElement`.
 - [x] Computed styles on `document.body`.
-- [ ] Accessible CSS rules from `document.styleSheets`.
+- [x] Accessible CSS rules from `document.styleSheets`.
 - [ ] Inline `<style>` tags.
 - [ ] Constructed stylesheets where available.
-- [ ] `html` and `body` class names.
-- [ ] `html` and `body` attributes such as `data-theme`, `data-mode`, `data-color-scheme`, and `theme`.
-- [ ] `matchMedia('(prefers-color-scheme: dark)')` when the site uses system mode.
+- [x] `html` and `body` class names.
+- [x] `html` and `body` attributes such as `data-theme`, `data-mode`, `data-color-scheme`, and `theme`.
+- [x] `matchMedia('(prefers-color-scheme: dark)')` when the site uses system mode.
 
 Detection algorithm checklist:
 
-- [ ] Read the active website mode from `html` and `body` before reading values.
-- [ ] Treat the actual current `html` or `body` selector state as the source of truth.
-- [ ] Detect selector patterns from accessible CSS rules that declare custom properties.
-- [ ] Parse selectors that contain classes, attributes, `:root`, `html`, and `body`.
-- [ ] Detect Tailwind/shadcn variables from declarations such as `--background`, `--primary`, and `--radius`.
+- [x] Require a complete shadcn/Tailwind theme block before treating a selector as a mode.
+- [x] Include shadow tokens in the required theme surface.
+- [x] Read the active website mode from `html` and `body` before reading values.
+- [x] Treat the actual current `html` or `body` selector state as the source of truth.
+- [x] Detect selector patterns from accessible CSS rules that declare custom properties.
+- [x] Parse selectors that contain classes, attributes, `:root`, `html`, and `body`.
+- [x] Detect Tailwind/shadcn variables from declarations such as `--background`, `--primary`, and `--radius`.
 - [ ] Detect Tailwind v4 mapped variables from `@theme inline`, such as `--color-background: var(--background)`.
-- [ ] Catch and ignore `SecurityError` from cross-origin stylesheets without failing the whole scan.
-- [ ] Use computed styles as a fallback when CSS rules are inaccessible.
-- [ ] Keep mode discovery separate from active-mode detection.
+- [x] Catch and ignore `SecurityError` from cross-origin stylesheets without failing the whole scan.
+- [x] Use computed styles as a fallback when CSS rules are inaccessible.
+- [x] Keep mode discovery separate from active-mode detection.
 - [ ] Do not mutate the website when discovering inactive modes unless there is no safer fallback.
 - [ ] If probing is necessary, make it temporary, hidden, and guarded against observers.
-- [ ] Remove debug logging from detection paths.
+- [x] Remove debug logging from detection paths.
 
 Mode selector examples to support:
 
@@ -224,45 +226,47 @@ The active mode must reflect the live website, not only the panel state.
 
 Checklist:
 
-- [ ] Observe `html` and `body` class changes.
-- [ ] Observe `html` and `body` attribute changes.
-- [ ] Observe `style` changes on `html` and `body`.
-- [ ] Observe relevant style/link changes in `document.head`.
-- [ ] Listen to `prefers-color-scheme` changes when system mode is detected.
-- [ ] Continue synchronization while the panel is mounted.
-- [ ] Debounce detection to avoid excessive recomputation.
-- [ ] Avoid feedback loops when WindPanel itself applies a mode.
-- [ ] Keep an internal `isApplyingMode` guard for panel-initiated changes.
-- [ ] If the website changes mode externally, update the panel segment and values.
-- [ ] If the panel changes mode, update the website's actual selector target.
-- [ ] Preserve unrelated classes and attributes on `html` and `body`.
+- [x] Observe `html` and `body` class changes.
+- [x] Observe `html` and `body` attribute changes.
+- [x] Observe `style` changes on `html` and `body`.
+- [x] Observe relevant style/link changes in `document.head`.
+- [x] Listen to `prefers-color-scheme` changes when system mode is detected.
+- [x] Continue synchronization while the panel is mounted.
+- [x] Debounce detection to avoid excessive recomputation.
+- [x] Avoid feedback loops when WindPanel itself applies a mode.
+- [x] Keep an internal `isApplyingMode` guard for panel-initiated changes.
+- [x] If the website changes mode externally, update the panel segment and values.
+- [x] If the panel changes mode, update the website's actual selector target.
+- [x] Preserve unrelated classes and attributes on `html` and `body`.
 
 Activation behavior checklist:
 
-- [ ] If the site uses `html.dark`, toggle only `html.classList`.
-- [ ] If the site uses `body.dark`, toggle only `body.classList`.
-- [ ] If the site uses `[data-theme="dark"]`, set the detected attribute on the detected target.
-- [ ] If multiple activation targets exist, choose the highest-confidence current source.
+- [x] If the site uses `html.dark`, toggle only `html.classList`.
+- [x] If the site uses `body.dark`, toggle only `body.classList`.
+- [x] If the site uses `[data-theme="dark"]`, set the detected attribute on the detected target.
+- [x] If multiple activation targets exist, choose the highest-confidence current source.
 - [ ] If no activation target is known, apply only variable overrides and show the mode as custom/manual.
 
 ## 8. Variable Reading and Overrides
 
 Checklist:
 
-- [ ] Read variables into immutable snapshots.
+- [x] Read variables into immutable snapshots.
 - [ ] Store original detected values separately from user overrides.
 - [ ] Store per-mode user overrides.
 - [ ] Apply overrides only for the active mode by default.
+- [ ] Resolve variable references such as `var(--primary)` when previewing and exporting.
+- [ ] Support fallback chains such as `var(--brand, var(--primary, oklch(...)))`.
 - [ ] Support applying a preset to one mode or all modes.
 - [ ] Support clearing one variable override.
 - [ ] Support clearing all overrides.
 - [ ] Support resetting to the detected website values.
 - [ ] Preserve invalid but user-entered strings until validation runs.
-- [ ] Avoid silently dropping variables that are not in the default list.
+- [x] Avoid silently dropping variables that are not in the default list.
 
 Implementation checklist:
 
-- [ ] Add a `ThemeDocument` or equivalent state object for modes, variables, and metadata.
+- [x] Add a `ThemeDocument` or equivalent state object for modes, variables, and metadata.
 - [ ] Apply variable overrides through a dedicated style element or scoped override layer.
 - [ ] Prefer a dedicated style element over writing many values directly to `body.style`.
 - [ ] Make override ownership obvious, for example `<style data-windpanel-overrides>`.
@@ -278,28 +282,28 @@ Current state:
 - [x] A Presets tab exists.
 - [x] The panel contains mock preset cards.
 - [x] Preset cards show name, font, swatches, and radius indicator.
-- [ ] Presets do not apply real theme values.
-- [ ] Presets are not persisted.
-- [ ] Presets cannot be edited.
+- [x] Presets do not apply real theme values.
+- [x] Presets are not persisted.
+- [x] Presets cannot be edited.
 
 Feature checklist:
 
-- [ ] Add page title `Presets`.
-- [ ] Add primary action for creating a preset.
-- [ ] Add import-from-clipboard action.
-- [ ] Add future marketplace entry point.
-- [ ] Show bundled presets that ship with the extension.
-- [ ] Show user-created presets saved in extension storage.
-- [ ] Allow applying a preset to the active mode.
-- [ ] Allow applying a preset to all compatible modes.
-- [ ] Allow duplicating a preset.
-- [ ] Allow editing a preset.
-- [ ] Allow deleting user-created presets.
-- [ ] Prevent deleting bundled presets unless copied into user space.
-- [ ] Persist user presets across tab closes, browser closes, and browser restarts.
-- [ ] Validate imported presets before saving.
-- [ ] Preserve mode-specific values in imports.
-- [ ] Show a useful error when imported preset data cannot be parsed.
+- [x] Add page title `Presets`.
+- [x] Add primary action for creating a preset.
+- [x] Add import-from-clipboard action.
+- [x] Add future marketplace entry point.
+- [x] Show bundled presets that ship with the extension.
+- [x] Show user-created presets saved in extension storage.
+- [x] Allow applying a preset to the active mode.
+- [x] Allow applying a preset to all compatible modes.
+- [x] Allow duplicating a preset.
+- [x] Allow editing a preset.
+- [x] Allow deleting user-created presets.
+- [x] Prevent deleting bundled presets unless copied into user space.
+- [x] Persist user presets across tab closes, browser closes, and browser restarts.
+- [x] Validate imported presets before saving.
+- [x] Preserve mode-specific values in imports.
+- [x] Show a useful error when imported preset data cannot be parsed.
 
 Preset card checklist:
 
@@ -315,16 +319,16 @@ Preset card checklist:
 
 Preset storage checklist:
 
-- [ ] Add WXT `storage.defineItem` for presets.
-- [ ] Add `storage` permission to `wxt.config.ts`.
-- [ ] Version preset schema.
+- [x] Add WXT `storage.defineItem` for presets.
+- [x] Add `storage` permission to `wxt.config.ts`.
+- [x] Version preset schema.
 - [ ] Migrate old preset schema versions.
 - [ ] Include preset metadata: id, name, createdAt, updatedAt, source, modes, variables.
 
 Marketplace checklist:
 
-- [ ] Add placeholder UI for marketplace.
-- [ ] Define marketplace preset schema.
+- [x] Add placeholder UI for marketplace.
+- [x] Define marketplace preset schema.
 - [ ] Decide whether marketplace is remote, bundled registry, or both.
 - [ ] Add trust/safety rules for imported marketplace data.
 - [ ] Add later task for publishing community preset packs.
@@ -339,18 +343,18 @@ Current state:
 - [x] Variables can be edited as raw strings.
 - [x] Groups can collapse.
 - [x] Some color preview behavior exists.
-- [ ] Requested groups are not implemented.
-- [ ] OKLCH color editing is not implemented.
-- [ ] Non-color previews are basic or missing.
+- [x] Requested groups are not implemented.
+- [x] OKLCH color editing is not implemented.
+- [x] Non-color previews are basic or missing.
 
 Requested groups:
 
-- [ ] Basic
-- [ ] Border
-- [ ] Typography
-- [ ] Charts
-- [ ] Background
-- [ ] Miscellaneous
+- [x] Basic
+- [x] Border
+- [x] Typography
+- [x] Charts
+- [x] Background
+- [x] Miscellaneous
 
 Grouping rules checklist:
 
@@ -365,29 +369,31 @@ Grouping rules checklist:
 
 Layout checklist:
 
-- [ ] Add page title `Variables`.
-- [ ] Add add-variable button.
-- [ ] Use a two-column grid when the panel width supports it.
-- [ ] Fall back to one column on narrow widths.
-- [ ] Enlarge or adjust the panel width only when needed.
-- [ ] Keep labels and inputs readable.
-- [ ] Keep sections collapsible.
-- [ ] Remember collapsed group state during the current panel session.
+- [x] Add page title `Variables`.
+- [x] Add add-variable button.
+- [x] Use a two-column grid when the panel width supports it.
+- [x] Fall back to one column on narrow widths.
+- [x] Enlarge or adjust the panel width only when needed.
+- [x] Keep labels and inputs readable.
+- [x] Keep sections collapsible.
+- [x] Remember collapsed group state during the current panel session.
 - [ ] Consider persisting collapsed group preferences later.
 
 Input and preview checklist:
 
-- [ ] Every variable has a raw string input.
-- [ ] Color variables show a swatch.
-- [ ] Clicking a color swatch opens a color editor.
-- [ ] Color editor supports OKLCH values.
-- [ ] Color editor can use an OKLCH-friendly workflow inspired by oklume.com.
-- [ ] Hex/rgb/hsl/named colors should still be accepted when valid CSS.
-- [ ] Border variables show a border preview.
-- [ ] Radius variables show a radius preview.
-- [ ] Typography variables show a text sample.
-- [ ] Chart variables can use simple swatches and raw inputs.
-- [ ] Miscellaneous variables detect color-like values when possible.
+- [x] Every variable has a raw string input.
+- [x] Color variables show a swatch.
+- [x] Clicking a color swatch opens a color editor.
+- [x] Color editor supports OKLCH values.
+- [x] Color editor can use an OKLCH-friendly workflow inspired by oklume.com.
+- [x] Hex/rgb/hsl/named colors should still be accepted when valid CSS.
+- [ ] Replace the compact OKLCH controls with an Oklume-quality picker or direct Oklume integration.
+- [ ] Add a color snippet tool that can pick colors from the current page for future reuse.
+- [x] Border variables show a border preview.
+- [x] Radius variables show a radius preview.
+- [x] Typography variables show a text sample.
+- [x] Chart variables can use simple swatches and raw inputs.
+- [x] Miscellaneous variables detect color-like values when possible.
 - [ ] Invalid values are visibly marked without blocking typing.
 
 ## 11. Theme Page
@@ -399,26 +405,26 @@ Current state:
 - [x] A Theme tab exists.
 - [x] Copy button exists.
 - [x] Paste button exists.
-- [ ] Editor currently uses JSON instead of raw CSS.
-- [ ] Parser does not apply pasted values.
-- [ ] Error reporting is generic.
+- [x] Editor currently uses JSON instead of raw CSS.
+- [x] Parser does not apply pasted values.
+- [x] Error reporting is generic.
 
 Feature checklist:
 
-- [ ] Add page title `Theme`.
-- [ ] Replace JSON editor with CSS editor.
-- [ ] Show all modes in one CSS document.
-- [ ] Include base/default mode.
-- [ ] Include dark mode when present.
-- [ ] Include any additional modes when present.
-- [ ] Add paste-from-clipboard button.
-- [ ] Add copy-current-theme button.
-- [ ] Add more-options button.
-- [ ] Add copy-single-mode option.
-- [ ] Add copy-all-modes option.
-- [ ] Add save-as-preset button.
-- [ ] Apply valid pasted CSS to current theme state.
-- [ ] Preserve mode selectors on import.
+- [x] Add page title `Theme`.
+- [x] Replace JSON editor with CSS editor.
+- [x] Show all modes in one CSS document.
+- [x] Include base/default mode.
+- [x] Include dark mode when present.
+- [x] Include any additional modes when present.
+- [x] Add paste-from-clipboard button.
+- [x] Add copy-current-theme button.
+- [x] Add more-options button.
+- [x] Add copy-single-mode option.
+- [x] Add copy-all-modes option.
+- [x] Add save-as-preset button.
+- [x] Apply valid pasted CSS to current theme state.
+- [x] Preserve mode selectors on import.
 - [ ] Keep comments where practical, but do not require comment preservation for MVP.
 
 Suggested CSS export:
@@ -437,29 +443,29 @@ Suggested CSS export:
 
 Parsing checklist:
 
-- [ ] Parse raw CSS, not JSON.
-- [ ] Extract only CSS custom property declarations by default.
-- [ ] Preserve selector to mode mapping.
-- [ ] Validate balanced braces.
-- [ ] Validate selector blocks.
-- [ ] Validate declarations with missing names.
-- [ ] Validate declarations with missing values.
+- [x] Parse raw CSS, not JSON.
+- [x] Extract only CSS custom property declarations by default.
+- [x] Preserve selector to mode mapping.
+- [x] Validate balanced braces.
+- [x] Validate selector blocks.
+- [x] Validate declarations with missing names.
+- [x] Validate declarations with missing values.
 - [ ] Validate missing semicolons where they create ambiguous parsing.
 - [ ] Validate duplicate variables in the same selector and choose a deterministic behavior.
-- [ ] Allow unknown selectors but mark them as lower-confidence modes.
-- [ ] Allow unknown custom properties and classify them as miscellaneous.
-- [ ] Report exact invalid text snippets when parsing fails.
-- [ ] Report line and column when available.
+- [x] Allow unknown selectors but mark them as lower-confidence modes.
+- [x] Allow unknown custom properties and classify them as miscellaneous.
+- [x] Report exact invalid text snippets when parsing fails.
+- [x] Report line and column when available.
 - [ ] Apply valid blocks when invalid unrelated text can be isolated.
 
 Error UX checklist:
 
-- [ ] Prefer a clear banner or toast for whole-document parse errors.
-- [ ] Include the invalid snippet in the error message.
-- [ ] Include line and column when possible.
+- [x] Prefer a clear banner or toast for whole-document parse errors.
+- [x] Include the invalid snippet in the error message.
+- [x] Include line and column when possible.
 - [ ] Keep inline field errors optional for later.
-- [ ] Do not destroy user input after a failed parse.
-- [ ] Add success feedback after paste/apply/copy/save.
+- [x] Do not destroy user input after a failed parse.
+- [x] Add success feedback after paste/apply/copy/save.
 
 ## 12. Panel Shell and Animation
 
@@ -473,17 +479,17 @@ Current state:
 
 Checklist:
 
-- [ ] Add right, top, and bottom margin on desktop.
-- [ ] Add rounded panel edges.
-- [ ] Keep the handle aligned to the rounded panel shell.
-- [ ] Ensure the handle is usable when the panel is closed.
-- [ ] Use a less extreme bounce curve.
-- [ ] Tune open duration separately from close duration if needed.
+- [x] Add right, top, and bottom margin on desktop.
+- [x] Add rounded panel edges.
+- [x] Keep the handle aligned to the rounded panel shell.
+- [x] Ensure the handle is usable when the panel is closed.
+- [x] Use a less extreme bounce curve.
+- [x] Tune open duration separately from close duration if needed.
 - [ ] Add opacity and subtle scale only if it improves perceived motion.
-- [ ] Avoid layout shift during open and close.
-- [ ] Add `prefers-reduced-motion` styles.
-- [ ] Ensure panel remains usable at mobile widths.
-- [ ] Ensure text and controls do not overflow.
+- [x] Avoid layout shift during open and close.
+- [x] Add `prefers-reduced-motion` styles.
+- [x] Ensure panel remains usable at mobile widths.
+- [x] Ensure text and controls do not overflow.
 
 ## 13. Demo Website Requirements
 
@@ -491,37 +497,37 @@ The demo app should be a test harness for real theme edge cases.
 
 Checklist:
 
-- [ ] Add a visible website-side theme toggle.
-- [ ] Add `html.dark` test mode.
+- [x] Add a visible website-side theme toggle.
+- [x] Add `html.dark` test mode.
 - [ ] Add `body.dark` test mode.
 - [ ] Add `html[data-theme="dark"]` test mode.
 - [ ] Add `body[data-theme="dark"]` test mode.
-- [ ] Add at least one third mode, such as `sepia` or `dim`.
+- [x] Add at least one third mode, such as `sepia` or `dim`.
 - [ ] Add missing-variable scenario.
 - [ ] Add extra custom-variable scenario.
 - [ ] Add invalid/malformed theme snippet examples for the Theme page.
-- [ ] Add components that visibly use primary, secondary, accent, border, radius, and typography variables.
-- [ ] Add chart color swatches.
-- [ ] Add sidebar color demo.
-- [ ] Add visual state that makes live overrides obvious.
+- [x] Add components that visibly use primary, secondary, accent, border, radius, and typography variables.
+- [x] Add chart color swatches.
+- [x] Add sidebar color demo.
+- [x] Add visual state that makes live overrides obvious.
 
 ## 14. Testing Strategy
 
 Current state:
 
 - [x] `bun run check` exists.
-- [ ] No dedicated unit tests were found.
+- [x] No dedicated unit tests were found.
 - [ ] No browser/visual tests were found.
-- [ ] No parser tests were found.
+- [x] No parser tests were found.
 
 Checklist:
 
-- [ ] Add unit tests for variable grouping.
-- [ ] Add unit tests for mode selector parsing.
-- [ ] Add unit tests for CSS theme parsing.
-- [ ] Add unit tests for CSS export.
+- [x] Add unit tests for variable grouping.
+- [x] Add unit tests for mode selector parsing.
+- [x] Add unit tests for CSS theme parsing.
+- [x] Add unit tests for CSS export.
 - [ ] Add unit tests for active mode detection.
-- [ ] Add unit tests for preset schema validation.
+- [x] Add unit tests for preset schema validation.
 - [ ] Add unit tests for storage migrations.
 - [ ] Add WXT fake-browser tests for storage-backed behavior where useful.
 - [ ] Add Svelte component checks.
@@ -589,44 +595,45 @@ Checklist:
 
 ### Phase 1: Correct Theme Model
 
-- [ ] Introduce dynamic mode and variable data model.
-- [ ] Move theme detection/parsing helpers out of `content.ts` into testable modules.
-- [ ] Replace fixed `ThemeMode` usages with dynamic ids.
-- [ ] Remove debug logging.
-- [ ] Add unit tests for new pure helpers.
+- [x] Introduce dynamic mode and variable data model.
+- [x] Move theme detection/parsing helpers out of `content.ts` into testable modules.
+- [x] Replace fixed `ThemeMode` usages with dynamic ids.
+- [x] Remove debug logging.
+- [x] Add unit tests for new pure helpers.
 
 ### Phase 2: Reliable Mode Detection and Sync
 
-- [ ] Discover mode selectors from CSS rules.
-- [ ] Detect active mode from live `html` and `body`.
-- [ ] Observe external website mode changes while panel is mounted.
-- [ ] Apply panel-selected mode through the website's detected selector mechanism.
-- [ ] Add demo edge cases for class and data-attribute modes.
+- [x] Discover mode selectors from CSS rules.
+- [x] Detect active mode from live `html` and `body`.
+- [x] Observe external website mode changes while panel is mounted.
+- [x] Apply panel-selected mode through the website's detected selector mechanism.
+- [x] Add demo edge cases for class and data-attribute modes.
 
 ### Phase 3: Variables Editing
 
-- [ ] Implement requested variable groups.
-- [ ] Add typed previews.
-- [ ] Add OKLCH-friendly color workflow.
+- [x] Implement requested variable groups.
+- [x] Add typed previews.
+- [x] Add OKLCH-friendly color workflow.
 - [ ] Store overrides separately from detected values.
 - [ ] Add reset/clear behavior.
 
 ### Phase 4: Presets
 
-- [ ] Define preset schema.
-- [ ] Add bundled presets.
-- [ ] Add persistent user presets.
-- [ ] Add import/export validation.
-- [ ] Add edit/delete/duplicate/apply flows.
-- [ ] Add marketplace placeholder.
+- [x] Define preset schema.
+- [x] Add bundled presets.
+- [x] Add persistent user presets.
+- [x] Add import/export validation.
+- [x] Add edit/delete/duplicate/apply flows.
+- [x] Add marketplace placeholder.
 
 ### Phase 5: Theme CSS Editor
 
-- [ ] Implement CSS export for all modes.
-- [ ] Implement CSS parser.
-- [ ] Implement precise error reporting.
-- [ ] Implement paste/apply/copy/save-as-preset actions.
-- [ ] Add parser tests and browser tests.
+- [x] Implement CSS export for all modes.
+- [x] Implement CSS parser.
+- [x] Implement precise error reporting.
+- [x] Implement paste/apply/copy/save-as-preset actions.
+- [x] Add parser tests.
+- [ ] Add browser tests.
 
 ### Phase 6: Polish and Release
 
@@ -654,12 +661,12 @@ WindPanel is ready for an MVP release when:
 
 ## 19. Current Baseline Diagnostics
 
-`bun run check` was run on 2026-05-21 and currently fails before any implementation work in this spec.
+`bun run check` was failing on 2026-05-21 before implementation work. The baseline is now green after the dynamic-mode refactor.
 
 Checklist:
 
-- [ ] Fix `ThemePanel.svelte` grouped variable typing so variables are inferred as `ThemeVariable[]`, not `string[]`.
-- [ ] Fix `ThemePanel.svelte` indexed access errors around `$detectedTheme[$activeMode][variable]`.
-- [ ] Fix `ThemePanel.svelte` `onVariableChange` calls that currently pass `string` where `ThemeVariable` is required.
-- [ ] Re-run `bun run check`.
+- [x] Fix `ThemePanel.svelte` grouped variable typing so variables are inferred as `ThemeVariable[]`, not `string[]`.
+- [x] Fix `ThemePanel.svelte` indexed access errors around `$detectedTheme[$activeMode][variable]`.
+- [x] Fix `ThemePanel.svelte` `onVariableChange` calls that currently pass `string` where `ThemeVariable` is required.
+- [x] Re-run `bun run check`.
 - [ ] Add this check to CI once the baseline is green.

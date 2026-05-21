@@ -7,13 +7,14 @@
   "scripts": {
     "dev": "concurrently -n extension,demo -c cyan,magenta \"bun run dev:extension\" \"bun run dev:demo\"",
     "dev:extension": "wxt",
-    "dev:demo": "bun --cwd demo dev",
+    "dev:demo": "bun run --cwd demo dev",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
-    "demo:build": "bun --cwd demo/windpanel-demo build",
+    "demo:build": "bun run --cwd demo build",
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
+    "test": "bun test",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "postinstall": "wxt prepare"
   },

@@ -7,6 +7,7 @@ export default defineConfig({
   manifest: {
     name: 'WindPanel',
     description: 'A browser extension for Tailwind CSS theme variable inspection and customization.',
+    permissions: ['storage'],
     tags: ['tailwind', 'css', 'theme', 'variables', 'inspection', 'customization'],
     action: {
       default_title: 'No Tailwind theme variables present on this website',
