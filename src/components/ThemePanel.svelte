@@ -24,6 +24,7 @@
     | { type: 'variable'; variable: string; kind: VariableEditorKind }
     | null;
   type VariableEditorKind = 'color' | 'font' | 'shadow' | 'border' | 'radius' | 'generic';
+  type CssLength = { amount: string; unit: string; numeric: number };
 
   let {
     themeDocument,
@@ -70,6 +71,17 @@
     'Verdana, Geneva, sans-serif',
     'Arial, Helvetica, sans-serif',
   ];
+  const colorPalette = [
+    'oklch(0.62 0.19 259.76)',
+    'oklch(0.71 0.14 254.69)',
+    'oklch(0.68 0.17 230)',
+    'oklch(0.72 0.14 155)',
+    'oklch(0.82 0.18 84)',
+    'oklch(0.7 0.19 22)',
+    'oklch(0.54 0.26 292)',
+    'oklch(0.94 0.04 83)',
+  ];
+  const OKLCH_MAX_CHROMA = 0.32;
 
   let activeMode = $derived(
     $themeDocument.modes.find((mode) => mode.id === $activeModeId) ||
@@ -211,7 +223,7 @@
     showNotice('Preset deleted');
   }
 
-	  async function duplicatePreset(preset: ThemePreset): Promise<void> {
+  async function duplicatePreset(preset: ThemePreset): Promise<void> {
     const copy = {
       ...preset,
       id: `${preset.id}-copy-${Date.now().toString(36)}`,
@@ -225,10 +237,10 @@
     showNotice('Preset duplicated');
   }
 
-	  function applyPreset(preset: ThemePreset, allModes = false): void {
-	    onThemeDocumentChange(applyPresetToDocument($themeDocument, preset, { modeId: $activeModeId, allModes }));
-	    showNotice('Preset applied');
-	  }
+  function applyPreset(preset: ThemePreset, allModes = false): void {
+    onThemeDocumentChange(applyPresetToDocument($themeDocument, preset, { modeId: $activeModeId, allModes }));
+    showNotice('Preset applied');
+  }
 
   async function saveCurrentThemeAsPreset(): Promise<void> {
     const name = window.prompt('Preset name', 'Current theme');
@@ -316,6 +328,26 @@
     onVariableChange($activeModeId, variable, `oklch(${next.l} ${next.c} ${next.h}${alpha})`);
   }
 
+  function setOklchColor(variable: string, l: number, c: number, h: number, alpha = ''): void {
+    const alphaValue = alpha ? ` / ${alpha}` : '';
+    onVariableChange($activeModeId, variable, `oklch(${formatNumber(l)} ${formatNumber(c)} ${formatNumber(h)}${alphaValue})`);
+  }
+
+  function pickOklchFromGrid(variable: string, event: PointerEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+    const y = clamp((event.clientY - rect.top) / rect.height, 0, 1);
+    const current = parseOklch(valueFor(variable)) || { l: '0.7', c: '0.12', h: '250', alpha: '' };
+    const hue = Number.parseFloat(current.h) || 250;
+
+    setOklchColor(variable, 0.98 - y * 0.96, x * OKLCH_MAX_CHROMA, hue, current.alpha);
+  }
+
+  function selectColorValue(variable: string, value: string): void {
+    onVariableChange($activeModeId, variable, value);
+  }
+
   function selectFont(variable: string, font: string): void {
     onVariableChange($activeModeId, variable, font);
     if (variable === 'font-heading') onVariableChange($activeModeId, 'font-sans', font);
@@ -328,37 +360,76 @@
     const current = parseShadowValue(valueFor(variable));
     const next = { ...current, [part]: value };
     const inset = next.inset ? 'inset ' : '';
-    onVariableChange($activeModeId, variable, `${inset}${next.x}px ${next.y}px ${next.blur}px ${next.spread}px ${next.color}`);
+    onVariableChange(
+      $activeModeId,
+      variable,
+      `${inset}${next.x}${next.unit} ${next.y}${next.unit} ${next.blur}${next.unit} ${next.spread}${next.unit} ${next.color}`,
+    );
   }
 
-  function parseShadowValue(value: string): { x: string; y: string; blur: string; spread: string; color: string; inset: boolean } {
+  function parseShadowValue(value: string): { x: string; y: string; blur: string; spread: string; unit: string; color: string; inset: boolean } {
     const inset = /\binset\b/.test(value);
-    const numbers = value.match(/-?\d+(?:\.\d+)?(?=px)/g) || [];
     const color = value.match(/oklch\([^)]+\)|#[0-9a-f]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)/i)?.[0] || 'oklch(0 0 0 / 0.16)';
+    const lengthSource = value.replace(color, '');
+    const lengths = [...lengthSource.matchAll(/(-?\d+(?:\.\d+)?)([a-z%]+)?/gi)];
+    const unit = lengths.find((match) => match[2])?.[2] || 'px';
 
     return {
-      x: numbers[0] || '0',
-      y: numbers[1] || '4',
-      blur: numbers[2] || '12',
-      spread: numbers[3] || '0',
+      x: lengths[0]?.[1] || '0',
+      y: lengths[1]?.[1] || '4',
+      blur: lengths[2]?.[1] || '12',
+      spread: lengths[3]?.[1] || '0',
+      unit,
       color,
       inset,
     };
   }
 
-  function updateRadius(variable: string, value: string): void {
-    onVariableChange($activeModeId, variable, value);
+  function parseCssLength(value: string, fallbackUnit = 'rem', fallbackValue = 0.625): CssLength {
+    const match = value.trim().match(/^(-?\d+(?:\.\d+)?)([a-z%]+)?/i);
+    const numeric = match ? Number.parseFloat(match[1]) : fallbackValue;
+    const unit = match?.[2] || fallbackUnit;
+
+    return {
+      amount: Number.isFinite(numeric) ? formatNumber(numeric) : formatNumber(fallbackValue),
+      unit,
+      numeric: Number.isFinite(numeric) ? numeric : fallbackValue,
+    };
+  }
+
+  function lengthSliderMax(length: CssLength): number {
+    if (length.unit === 'rem' || length.unit === 'em') return 3;
+    if (length.unit === '%') return 100;
+    return 48;
+  }
+
+  function lengthSliderStep(length: CssLength): number {
+    if (length.unit === 'rem' || length.unit === 'em') return 0.025;
+    if (length.unit === '%') return 1;
+    return 1;
+  }
+
+  function updateLengthVariable(variable: string, amount: string, unit: string): void {
+    onVariableChange($activeModeId, variable, `${amount}${unit}`);
+  }
+
+  function clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function formatNumber(value: number): string {
+    return value.toFixed(3).replace(/\.?0+$/u, '');
   }
 
   function modeValuesForPreset(preset: ThemePreset): Record<string, string> {
     const modes = Array.isArray(preset.modes) ? preset.modes : normalizePreset(preset)?.modes || [];
-	    const presetMode =
-	      modes.find((mode) => mode.id === $activeModeId) ||
-	      modes.find((mode) => mode.id === DEFAULT_MODE_ID) ||
-	      modes[0];
+    const presetMode =
+      modes.find((mode) => mode.id === $activeModeId) ||
+      modes.find((mode) => mode.id === DEFAULT_MODE_ID) ||
+      modes[0];
 
-	    return presetMode?.values || {};
-	  }
+    return presetMode?.values || {};
+  }
 </script>
 
 <div class="shell" class:open={$open} aria-label="WindPanel Theme Editor">
@@ -523,11 +594,11 @@
             <h3>Theme</h3>
             <p>Raw CSS across all modes</p>
           </div>
-	          <div class="actions">
-	            <button type="button" class="action-btn" onclick={pasteTheme}>Paste</button>
-	            <button type="button" class="action-btn" onclick={copyTheme}>Copy</button>
-	            <button type="button" class="action-btn" onclick={saveCurrentThemeAsPreset}>Save preset</button>
-	            <div class="more-wrap">
+          <div class="actions">
+            <button type="button" class="action-btn" onclick={pasteTheme}>Paste</button>
+            <button type="button" class="action-btn" onclick={saveCurrentThemeAsPreset}>Save preset</button>
+            <button type="button" class="action-btn" onclick={copyTheme}>Copy</button>
+            <div class="more-wrap">
               <button type="button" class="action-btn more-button" aria-label="More copy options" onclick={() => (showCopyOptions = !showCopyOptions)}>...</button>
               {#if showCopyOptions}
                 <div class="dropdown">
@@ -570,8 +641,8 @@
     {/if}
 
     {#if modal}
-	      <button class="modal-backdrop" type="button" aria-label="Close modal" onclick={() => (modal = null)}></button>
-	      <section class="modal" role="dialog" aria-modal="true" tabindex="-1">
+      <button class="modal-backdrop" type="button" aria-label="Close modal" onclick={() => (modal = null)}></button>
+      <section class="modal" role="dialog" aria-modal="true" tabindex="-1">
           {#if modal.type === 'add-preset'}
             <header class="modal-header">
               <h3>Add preset</h3>
@@ -596,10 +667,27 @@
             {#if modal.kind === 'color'}
               {@const oklch = parseOklch(value)}
               <div class="color-modal-preview" style={`background:${value || 'transparent'}`}></div>
+              <button
+                type="button"
+                class="oklch-plane"
+                style={`--picker-h:${oklch?.h || '250'}`}
+                aria-label={`Pick ${variable} color`}
+                onpointerdown={(event) => pickOklchFromGrid(variable, event)}
+              >
+                <span
+                  class="oklch-cursor"
+                  style={`left:${clamp((Number.parseFloat(oklch?.c || '0.12') / OKLCH_MAX_CHROMA) * 100, 0, 100)}%; top:${clamp((1 - Number.parseFloat(oklch?.l || '0.7')) * 100, 0, 100)}%`}
+                ></span>
+              </button>
+              <div class="color-palette" aria-label="Color presets">
+                {#each colorPalette as color}
+                  <button type="button" style={`background:${color}`} aria-label={`Use ${color}`} onclick={() => selectColorValue(variable, color)}></button>
+                {/each}
+              </div>
               <div class="field-grid">
-                <label>Lightness<input value={oklch?.l || '0.7'} oninput={(event) => updateOklch(variable, 'l', event.currentTarget.value)} /></label>
-                <label>Chroma<input value={oklch?.c || '0.12'} oninput={(event) => updateOklch(variable, 'c', event.currentTarget.value)} /></label>
-                <label>Hue<input value={oklch?.h || '250'} oninput={(event) => updateOklch(variable, 'h', event.currentTarget.value)} /></label>
+                <label>Lightness<input type="range" min="0" max="1" step="0.005" value={oklch?.l || '0.7'} oninput={(event) => updateOklch(variable, 'l', event.currentTarget.value)} /></label>
+                <label>Chroma<input type="range" min="0" max={OKLCH_MAX_CHROMA} step="0.005" value={oklch?.c || '0.12'} oninput={(event) => updateOklch(variable, 'c', event.currentTarget.value)} /></label>
+                <label class="wide">Hue<input type="range" min="0" max="360" step="1" value={oklch?.h || '250'} oninput={(event) => updateOklch(variable, 'h', event.currentTarget.value)} /></label>
               </div>
             {:else if modal.kind === 'font'}
               <input class="search-input" placeholder="Search fonts" bind:value={fontSearch} />
@@ -620,18 +708,19 @@
                 <label class="check-row">Inner<input type="checkbox" checked={shadow.inset} onchange={(event) => updateShadow(variable, 'inset', event.currentTarget.checked)} /></label>
               </div>
             {:else if modal.kind === 'border' || modal.kind === 'radius'}
+              {@const radius = parseCssLength(value)}
               <div class="border-modal-preview" style={`border-radius:${value || '8px'}`}></div>
               <div class="field-grid">
-                <label class="wide">Value<input value={value} oninput={(event) => updateRadius(variable, event.currentTarget.value)} /></label>
-                <label>Radius<input type="range" min="0" max="48" value={parseFloat(value) || 8} oninput={(event) => updateRadius(variable, `${event.currentTarget.value}px`)} /></label>
+                <label class="wide">Value<input value={value} oninput={(event) => onVariableChange($activeModeId, variable, event.currentTarget.value)} /></label>
+                <label class="wide">Radius<input type="range" min="0" max={lengthSliderMax(radius)} step={lengthSliderStep(radius)} value={radius.amount} oninput={(event) => updateLengthVariable(variable, event.currentTarget.value, radius.unit)} /></label>
               </div>
             {:else}
               <label class="modal-field">Value<input value={value} oninput={(event) => onVariableChange($activeModeId, variable, event.currentTarget.value)} /></label>
             {/if}
           {/if}
-	      </section>
-	    {/if}
-	  </section>
+      </section>
+    {/if}
+  </section>
 </div>
 
 <style>
@@ -642,8 +731,8 @@
   :root {
     --wp-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --wp-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --wp-bg: rgba(255, 255, 255, 0.94);
-    --wp-surface: #ffffff;
+    --wp-bg: rgba(255, 255, 255, 0.78);
+    --wp-surface: rgba(255, 255, 255, 0.84);
     --wp-border: rgba(15, 23, 42, 0.12);
     --wp-text: #101828;
     --wp-muted: #667085;
@@ -676,14 +765,15 @@
     border-radius: 18px;
     background: var(--wp-bg);
     box-shadow: var(--wp-shadow);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
     pointer-events: auto;
-    transform: translateX(calc(100% + 28px)) scale(0.985);
-    opacity: 0.98;
+    transform: translateX(calc(100% + 36px)) scale(0.96);
+    opacity: 0;
+    will-change: transform, opacity;
     transition:
-      transform 360ms cubic-bezier(0.2, 0.9, 0.2, 1),
-      opacity 180ms ease;
+      transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 260ms ease;
   }
 
   .shell.open .panel {
@@ -948,9 +1038,10 @@
     padding: 10px;
     border: 1px solid var(--preset-border);
     border-radius: var(--preset-radius);
-    background: var(--preset-bg);
-    color: var(--preset-fg);
+    background: color-mix(in srgb, var(--wp-surface) 84%, transparent);
+    color: var(--wp-text);
     font-family: var(--preset-font);
+    box-shadow: inset 4px 0 0 var(--preset-bg);
   }
 
   .preset-main {
@@ -1102,29 +1193,29 @@
   }
 
   .modal-backdrop {
-	    position: absolute;
-	    inset: 0;
-	    z-index: 6;
-	    width: 100%;
-	    height: 100%;
-	    padding: 0;
-	    border: 0;
-	    border-radius: 18px;
-	    background: rgba(15, 23, 42, 0.22);
-	    cursor: default;
-	  }
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.22);
+      cursor: default;
+    }
 
   .modal {
-	    position: absolute;
-	    top: 50%;
-	    left: 50%;
-	    z-index: 7;
-	    width: min(100%, 360px);
-	    max-height: min(620px, calc(100vh - 72px));
-	    overflow: auto;
-	    transform: translate(-50%, -50%);
-	    padding: 14px;
-	    border: 1px solid var(--wp-border);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 7;
+      width: min(100%, 360px);
+      max-height: min(620px, calc(100vh - 72px));
+      overflow: auto;
+      transform: translate(-50%, -50%);
+      padding: 14px;
+      border: 1px solid var(--wp-border);
     border-radius: 14px;
     background: var(--wp-surface);
     box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
@@ -1168,6 +1259,46 @@
     border: 3px solid var(--wp-accent);
   }
 
+  .oklch-plane {
+    position: relative;
+    width: 100%;
+    height: 156px;
+    margin-bottom: 12px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--wp-border);
+    border-radius: 12px;
+    background:
+      linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent 48%, rgba(255, 255, 255, 0.88)),
+      linear-gradient(to right, oklch(0.72 0 var(--picker-h)), oklch(0.72 0.32 var(--picker-h)));
+    cursor: crosshair;
+  }
+
+  .oklch-cursor {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.55), 0 2px 10px rgba(15, 23, 42, 0.28);
+    transform: translate(-50%, -50%);
+  }
+
+  .color-palette {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .color-palette button {
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 1px solid var(--wp-border);
+    border-radius: 7px;
+    cursor: pointer;
+  }
+
   .field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1203,6 +1334,7 @@
 
   .field-grid input[type='range'] {
     padding: 0;
+    accent-color: var(--wp-accent);
   }
 
   .check-row {

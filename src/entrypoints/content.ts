@@ -55,6 +55,7 @@ export default defineContentScript({
       if (message?.type !== TOGGLE_PANEL_MESSAGE || !hasTheme) return;
 
       void (async () => {
+        const wasMounted = Boolean(ui?.mounted);
         ui ??= await createPanelUi(ctx, {
           getThemeDocument: () => detectedTheme,
           themeDocumentStore,
@@ -79,7 +80,14 @@ export default defineContentScript({
         });
 
         if (!ui.mounted) ui.mount();
-        open.update((value) => !value);
+
+        if (wasMounted) {
+          open.update((value) => !value);
+        } else {
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => open.set(true));
+          });
+        }
       })();
     });
   },

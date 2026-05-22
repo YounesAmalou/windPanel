@@ -1,6 +1,14 @@
 ---
 import Layout from "@/layouts/main.astro"
 import { Button } from "@/components/ui/button"
+
+const themeModes = [
+  { id: "default", label: "Light", selector: ":root" },
+  { id: "html-dark", label: "Dark", selector: "html.dark" },
+  { id: "body-contrast", label: "High contrast", selector: "body.high-contrast" },
+  { id: "html-dim", label: "Dim", selector: 'html[data-theme="dim"]' },
+  { id: "body-sepia", label: "Sepia", selector: 'body[data-theme="sepia"]' },
+]
 ---
 
 <Layout>
@@ -10,24 +18,16 @@ import { Button } from "@/components/ui/button"
         <div class="mb-5">
           <p class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">WindPanel demo</p>
           <h1 class="mt-1 text-2xl font-semibold">Theme mode harness</h1>
+          <p class="mt-2 text-xs leading-5 text-muted-foreground">Only selectors with a complete Tailwind theme surface are listed here.</p>
         </div>
 
         <div class="grid gap-2" data-theme-controls>
-          <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted" data-theme-mode="default">
-            Default :root
-          </button>
-          <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted" data-theme-mode="html-dark">
-            html.dark
-          </button>
-          <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted" data-theme-mode="body-contrast">
-            body.high-contrast
-          </button>
-          <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted" data-theme-mode="html-dim">
-            html[data-theme="dim"]
-          </button>
-          <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted" data-theme-mode="body-sepia">
-            body[data-theme="sepia"]
-          </button>
+          {themeModes.map((mode) => (
+            <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted aria-[current=true]:border-primary aria-[current=true]:bg-primary/10" data-theme-mode={mode.id}>
+              <span class="block">{mode.label}</span>
+              <span class="mt-1 block font-mono text-[11px] text-muted-foreground">{mode.selector}</span>
+            </button>
+          ))}
         </div>
 
         <div class="mt-5 rounded-xl border border-sidebar-border bg-sidebar-accent p-3 text-sidebar-accent-foreground">
@@ -97,11 +97,12 @@ import { Button } from "@/components/ui/button"
     </div>
   </main>
 
-  <script>
+  <script define:vars={{ themeModes }}>
     const html = document.documentElement;
     const body = document.body;
     const status = document.querySelector('[data-theme-status]');
     const buttons = document.querySelectorAll('[data-theme-mode]');
+    const labels = Object.fromEntries(themeModes.map((mode) => [mode.id, mode.selector]));
 
     const resetTheme = () => {
       html.classList.remove('dark');
@@ -118,13 +119,7 @@ import { Button } from "@/components/ui/button"
       if (mode === 'html-dim') html.setAttribute('data-theme', 'dim');
       if (mode === 'body-sepia') body.setAttribute('data-theme', 'sepia');
 
-      const label = {
-        default: ':root',
-        'html-dark': 'html.dark',
-        'body-contrast': 'body.high-contrast',
-        'html-dim': 'html[data-theme="dim"]',
-        'body-sepia': 'body[data-theme="sepia"]',
-      }[mode] || ':root';
+      const label = labels[mode] || ':root';
 
       if (status) status.textContent = label;
 
