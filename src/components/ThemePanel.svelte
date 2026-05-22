@@ -768,8 +768,7 @@
     backdrop-filter: blur(22px) saturate(150%);
     -webkit-backdrop-filter: blur(22px) saturate(150%);
     pointer-events: auto;
-    transform: translateX(calc(100% + 36px)) scale(0.96);
-    opacity: 0;
+    transform: translateX(calc(100% + 3px)) scale(0.96);
     will-change: transform, opacity;
     transition:
       transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -778,7 +777,6 @@
 
   .shell.open .panel {
     transform: translateX(0) scale(1);
-    opacity: 1;
   }
 
   .handle {
