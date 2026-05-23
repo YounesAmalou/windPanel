@@ -1,0 +1,8 @@
+node_modules
+demo/.astro
+dist
+demo/dist
+demo/node_modules
+.output
+.vscode
+.wxt
