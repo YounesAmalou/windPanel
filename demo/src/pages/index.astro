@@ -1,200 +1,397 @@
 ---
 import Layout from "@/layouts/main.astro"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 const features = [
-  ["Detect real modes", "Find complete Tailwind 4 theme surfaces across :root, class selectors, body classes, and data-theme attributes."],
-  ["Edit with context", "Change OKLCH colors, radius, shadows, typography, and raw CSS while previewing the result against the page."],
-  ["Preserve presets", "Save imported or hand-tuned themes locally so the same palette is ready the next time you open the browser."],
-  ["Export clean CSS", "Copy the whole theme or a single mode when you are ready to move changes back into your project."],
+  {
+    title: "Detect real modes",
+    description: "Find complete Tailwind 4 theme surfaces across :root, class selectors, body classes, and data-theme attributes.",
+    badge: "Detection Engine"
+  },
+  {
+    title: "Edit with context",
+    description: "Change OKLCH colors, radius, shadows, typography, and raw CSS while previewing the result against the page.",
+    badge: "Visual Editor"
+  },
+  {
+    title: "Preserve presets",
+    description: "Save imported or hand-tuned themes locally so the same palette is ready the next time you open the browser.",
+    badge: "Local Presets"
+  },
+  {
+    title: "Export clean CSS",
+    description: "Copy the whole theme or a single mode when you are ready to move changes back into your project.",
+    badge: "Production Ready"
+  },
 ]
 
 const steps = [
-  "Open the embedded demo or any supported Tailwind site.",
-  "WindPanel reads the active mode from the page state.",
-  "Tune variables, switch modes, import CSS, or apply presets.",
-  "Copy the final theme back into your codebase.",
+  {
+    num: "01",
+    title: "Mount on site",
+    desc: "Open the embedded demo or any supported Tailwind site in your browser."
+  },
+  {
+    num: "02",
+    title: "Read active state",
+    desc: "WindPanel reads the active selectors and mode variables directly from page state."
+  },
+  {
+    num: "03",
+    title: "Tune values live",
+    desc: "Use the UI dials to tweak OKLCH colors, radius, shadows, or paste direct CSS overrides."
+  },
+  {
+    num: "04",
+    title: "Export back to project",
+    desc: "Copy the generated Tailwind CSS variables and place them back in your global stylesheet."
+  }
+]
+
+const faqs = [
+  {
+    q: "How does theme detection work under the hood?",
+    a: "WindPanel content scripts scan your page for standard Tailwind / shadcn CSS custom properties like --background, --primary, and --radius. It reads their computed values and temporary probe stylesheets to detect complete mode differences."
+  },
+  {
+    q: "Do I need to change my build configuration to use it?",
+    a: "No! WindPanel inspects standard, unminified CSS custom properties in your dev environment. It works out of the box with standard Tailwind CSS v4 and shadcn components without any build plugins."
+  },
+  {
+    q: "Are my theme edits sent to any external servers?",
+    a: "Absolutely not. WindPanel is completely local-first and privacy-respecting. All theme definitions, presets, and customized values are saved purely inside the browser's local storage."
+  },
+  {
+    q: "Does it support custom selectors or attributes?",
+    a: "Yes! It automatically detects common theme conventions (e.g., class='dark', data-theme='dim', data-color-scheme='dark') and lets you sync controls with whichever selector your website uses."
+  }
 ]
 ---
 
-<Layout title="WindPanel - Tailwind theme editor">
-  <main class="landing-shell">
-    <section class="hero">
-      <nav class="topbar" aria-label="Primary">
-        <a class="brand" href="/">
-          <img src="/windpanel-icon.png" alt="" />
-          <span>WindPanel</span>
-        </a>
-        <a href="/embedded-demo">Embedded demo</a>
-      </nav>
-
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="kicker">Tailwind 4 theme workbench</p>
-          <h1>Inspect and tune live CSS variables without leaving the page.</h1>
-          <p class="lede">
-            WindPanel detects complete Tailwind theme modes, gives you a focused editing panel, and keeps the website state as the
-            source of truth while you test colors, presets, fonts, radius, shadows, and raw CSS.
-          </p>
-          <div class="hero-actions">
-            <a class="primary-cta" href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer">Install from Chrome</a>
-            <a class="secondary-cta" href="/embedded-demo">View embedded demo</a>
-            <span>Browser extension build: local-first, no remote code.</span>
-          </div>
-        </div>
-
-        <div class="product-demo" data-product-demo>
-          <div class="website-card" data-site-preview>
-            <div class="window-bar" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div class="website-content">
-              <p>Live website</p>
-              <h2>Theme surface</h2>
-              <div class="sample-row">
-                <span data-token="primary"></span>
-                <span data-token="accent"></span>
-                <span data-token="background"></span>
-              </div>
-              <div class="sample-chart" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-          </div>
-
-          <aside class="mini-panel">
-            <div class="mini-head">
-              <img src="/windpanel-icon.png" alt="" />
-              <div>
-                <span>WindPanel</span>
-                <strong>Variables</strong>
-              </div>
-            </div>
-            <div class="mini-segments" aria-label="Preview theme">
-              <button type="button" class="active" data-preview-mode="light">Light</button>
-              <button type="button" data-preview-mode="dark">Dark</button>
-              <button type="button" data-preview-mode="dim">Dim</button>
-            </div>
-            <div class="mini-tokens">
-              <div><span data-dot="primary"></span><code>--primary</code></div>
-              <div><span data-dot="accent"></span><code>--accent</code></div>
-              <div><span data-dot="background"></span><code>--background</code></div>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <section class="metric-strip" aria-label="Extension highlights">
-      <div><strong>Tailwind 4</strong><span>@theme inline and CSS variable workflows</span></div>
-      <div><strong>Mode-aware</strong><span>Light, dark, data-theme, and custom selectors</span></div>
-      <div><strong>Local-first</strong><span>Presets stay in browser extension storage</span></div>
-    </section>
-
-    <section class="feature-section">
-      <p class="kicker">What it handles</p>
-      <div class="feature-grid">
-        {
-          features.map(([title, copy]) => (
-            <article>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </article>
-          ))
-        }
-      </div>
-    </section>
-
-    <section class="workflow-section">
-      <div class="section-copy">
-        <p class="kicker">Workflow</p>
-        <h2>Made for testing a theme where it will actually be used.</h2>
-      </div>
-      <ol>
-        {
-          steps.map((step, index) => (
-            <li>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <p>{step}</p>
-            </li>
-          ))
-        }
-      </ol>
-    </section>
-
-    <section class="demo-callout">
-      <div>
-        <p class="kicker">Try it now</p>
-        <h2>Open the embedded component demo.</h2>
-        <p>
-          The demo mounts the same Svelte panel inside Astro and exposes multiple complete theme modes so you can test detection,
-          mode switching, variable edits, presets, and CSS export without installing the extension first.
-        </p>
-      </div>
-      <a href="/embedded-demo">Launch embedded demo</a>
-    </section>
-
-    <section class="extension-info">
-      <div>
-        <p class="kicker">Extension details</p>
-        <h2>Built for developers editing Tailwind systems.</h2>
-      </div>
-      <dl>
-        <div>
-          <dt>Permissions</dt>
-          <dd>Uses storage for saved presets and page access to inspect theme variables on the current website.</dd>
-        </div>
-        <div>
-          <dt>Data model</dt>
-          <dd>Reads CSS custom properties, mode selectors, and active HTML/body state. Presets are stored locally.</dd>
-        </div>
-        <div>
-          <dt>Best fit</dt>
-          <dd>Tailwind 4, shadcn-style CSS variables, OKLCH palettes, and teams iterating on brand themes in-browser.</dd>
-        </div>
-      </dl>
-    </section>
-
-    <footer class="footer">
-      <a class="brand" href="/">
-        <img src="/windpanel-icon.png" alt="" />
+<Layout title="WindPanel - Tailwind Theme Editor">
+  <main class="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-accent/30 pb-16">
+    
+    <!-- Top Navigation -->
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <a class="flex items-center gap-3 font-black text-xl tracking-tight no-underline text-foreground hover:opacity-90 transition-opacity" href="/">
+        <img class="w-9 h-9" src="/windpanel-icon.png" alt="WindPanel Logo" />
         <span>WindPanel</span>
       </a>
-      <p>Tailwind theme inspection, presets, and variable editing for modern CSS workflows.</p>
-      <a href="/embedded-demo">Embedded demo</a>
+      <div class="flex items-center gap-4">
+        <a class="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors" href="/embedded-demo">Embedded Demo</a>
+        <a href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer">
+          <Button variant="outline" size="sm" className="hidden sm:inline-flex cursor-pointer">
+            Install Extension
+          </Button>
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="max-w-6xl mx-auto px-6 pt-12 pb-20">
+      <div class="grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
+        
+        <!-- Hero Left / Call to Action -->
+        <div class="flex flex-col items-start text-left">
+          <span class="mb-6 inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+            Tailwind CSS 4 Theme Workbench
+          </span>
+          
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[0.95] text-foreground">
+            Inspect and tune live CSS variables instantly.
+          </h1>
+          
+          <p class="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl">
+            WindPanel automatically scans your website for Tailwind theme modes, presents a premium editor interface, and maps variables live so you can iterate on brand styles directly in the browser.
+          </p>
+          
+          <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <a href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold cursor-pointer transition-transform hover:-translate-y-0.5">
+                Install from Chrome
+              </Button>
+            </a>
+            <a href="/embedded-demo" class="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full font-bold cursor-pointer transition-transform hover:-translate-y-0.5">
+                View Embedded Demo
+              </Button>
+            </a>
+          </div>
+          
+          <span class="mt-4 text-xs text-muted-foreground font-medium block">
+            Local-first extension, no analytics or tracking code.
+          </span>
+        </div>
+
+        <!-- Interactive Hero Right / Product Mockup -->
+        <div class="relative w-full aspect-[4/3] rounded-3xl border border-border p-4 transition-all duration-300 shadow-xl overflow-hidden bg-[color-mix(in_srgb,var(--demo-page,rgba(255,250,240,0.8))_90%,white)]" data-product-demo>
+          
+          <!-- Mockup Website Window -->
+          <div class="w-full h-full rounded-2xl bg-[var(--demo-card,oklch(1_0_0))] text-[var(--demo-text,oklch(0.16_0.025_263))] transition-all duration-200 border border-border shadow-sm flex flex-col overflow-hidden">
+            
+            <!-- Window Title Bar -->
+            <div class="flex items-center gap-1.5 px-4 py-3 border-b border-border">
+              <span class="w-2.5 h-2.5 rounded-full bg-current opacity-20"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-current opacity-20"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-current opacity-20"></span>
+              <span class="ml-4 text-[10px] font-mono opacity-45">my-tailwind-project.dev</span>
+            </div>
+            
+            <!-- Website Content Preview -->
+            <div class="p-6 sm:p-8 flex flex-col flex-1 justify-between select-none">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider font-extrabold text-[var(--demo-muted,oklch(0.49_0.04_263))]">Live Surface Preview</p>
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1 leading-none text-[var(--demo-text,oklch(0.16_0.025_263))] transition-colors">
+                  Theme Colors
+                </h2>
+                
+                <!-- Swatches inside website -->
+                <div class="flex gap-2.5 mt-6">
+                  <div class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl border-2 border-[var(--demo-primary,oklch(0.77_0.1_212.35))] transition-all duration-150 bg-transparent" title="Primary color swatch"></div>
+                  <div class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl transition-all duration-150 shadow-inner bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" title="Accent color swatch"></div>
+                  <div class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl transition-all duration-150 shadow-inner bg-[var(--demo-background,oklch(0.94_0.04_83))]" title="Background color swatch"></div>
+                </div>
+              </div>
+
+              <!-- Mini chart to show variables effect -->
+              <div class="flex items-end gap-2 h-20 sm:h-24 mt-4 overflow-hidden border-b border-border/40">
+                <div class="w-full rounded-t-lg transition-all duration-300 bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" style="height: 84%"></div>
+                <div class="w-full rounded-t-lg transition-all duration-300 border-2 border-b-0 border-[var(--demo-primary,oklch(0.77_0.1_212.35))]" style="height: 52%"></div>
+                <div class="w-full rounded-t-lg transition-all duration-300 bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" style="height: 74%"></div>
+                <div class="w-full rounded-t-lg transition-all duration-300 border-2 border-b-0 border-[var(--demo-primary,oklch(0.77_0.1_212.35))]" style="height: 38%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating Injected Extension Panel Mockup -->
+          <div class="absolute right-8 bottom-8 w-[240px] sm:w-[280px] p-4 bg-card/80 border border-border rounded-2xl shadow-2xl backdrop-blur-md flex flex-col gap-3 transition-transform duration-300 hover:scale-[1.02]">
+            <div class="flex items-center gap-2.5">
+              <img class="w-8 h-8 rounded-lg shadow-sm" src="/windpanel-icon.png" alt="" />
+              <div>
+                <span class="text-[10px] uppercase tracking-wider font-extrabold text-muted-foreground">WindPanel</span>
+                <strong class="block text-sm font-black leading-tight mt-0.5 text-card-foreground">Mock Workbench</strong>
+              </div>
+            </div>
+            
+            <!-- Segment Controls -->
+            <div class="grid grid-cols-3 gap-1 bg-muted p-1 rounded-xl text-xs font-bold text-foreground" aria-label="Mock mode toggle">
+              <button type="button" class="py-1 rounded-lg text-center transition-all bg-card shadow-sm" data-preview-mode="light">Light</button>
+              <button type="button" class="py-1 rounded-lg text-center transition-all hover:bg-card/40" data-preview-mode="dark">Dark</button>
+              <button type="button" class="py-1 rounded-lg text-center transition-all hover:bg-card/40" data-preview-mode="dim">Dim</button>
+            </div>
+            
+            <!-- Token Indicators -->
+            <div class="flex flex-col gap-1.5 text-xs">
+              <div class="flex items-center gap-2.5 px-2.5 py-2 border border-border rounded-xl bg-card">
+                <span class="w-3.5 h-3.5 rounded-md border-2 border-[var(--demo-primary,oklch(0.77_0.1_212.35))]" data-dot="primary"></span>
+                <code class="font-mono text-[10px] font-bold text-card-foreground">--primary</code>
+              </div>
+              <div class="flex items-center gap-2.5 px-2.5 py-2 border border-border rounded-xl bg-card">
+                <span class="w-3.5 h-3.5 rounded-md bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" data-dot="accent"></span>
+                <code class="font-mono text-[10px] font-bold text-card-foreground">--accent</code>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Highlights / Metrics Grid -->
+    <section class="max-w-6xl mx-auto px-6 py-8">
+      <div class="grid md:grid-cols-3 gap-6 rounded-3xl border border-border bg-card overflow-hidden p-2">
+        <div class="p-6 flex flex-col gap-2">
+          <Badge className="w-fit bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0 font-bold px-2 py-0.5">Tailwind v4</Badge>
+          <strong class="text-lg font-black mt-2">Theme Inline Workflows</strong>
+          <span class="text-sm text-muted-foreground leading-relaxed">Detects inline theme configurations, local variables, and full stylesheet overrides natively.</span>
+        </div>
+        <div class="p-6 flex flex-col gap-2 border-t md:border-t-0 md:border-l border-border">
+          <Badge className="w-fit bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0 font-bold px-2 py-0.5">Mode Aware</Badge>
+          <strong class="text-lg font-black mt-2">Flexible Selectors</strong>
+          <span class="text-sm text-muted-foreground leading-relaxed">Supports light, dark, custom dim modes, data attributes, class-based toggling, and media queries.</span>
+        </div>
+        <div class="p-6 flex flex-col gap-2 border-t md:border-t-0 md:border-l border-border">
+          <Badge className="w-fit bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0 font-bold px-2 py-0.5">Privacy First</Badge>
+          <strong class="text-lg font-black mt-2">Zero Remote Code</strong>
+          <span class="text-sm text-muted-foreground leading-relaxed">No tracking, no third-party APIs. Presets are stored directly in your browser's private extension storage.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section using Card Components -->
+    <section class="max-w-6xl mx-auto px-6 py-20">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+          Key Capabilities
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black mt-4 tracking-tight leading-none">
+          Everything you need to customize your UI.
+        </h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {
+          features.map((feat) => (
+            <Card className="border-border bg-card hover:shadow-lg transition-all duration-300">
+              <CardHeader className="pb-3 px-6 pt-6">
+                <Badge variant="secondary" className="w-fit font-bold px-2 py-0.5">{feat.badge}</Badge>
+                <CardTitle className="text-xl font-extrabold mt-3 tracking-tight">{feat.title}</CardTitle>
+              </CardHeader>
+              <CardContent class="px-6 pb-6 pt-0">
+                <p class="text-sm text-muted-foreground leading-relaxed">{feat.description}</p>
+              </CardContent>
+            </Card>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Workflow section -->
+    <section class="max-w-6xl mx-auto px-6 py-12">
+      <div class="grid lg:grid-cols-[0.8fr_1fr] gap-12 items-start">
+        
+        <div>
+          <span class="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+            Workflows
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-black mt-4 tracking-tight leading-none">
+            Built to integrate with how you work.
+          </h2>
+          <p class="mt-6 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-md">
+            Instead of manual cycles modifying stylesheet values, reloading components, and checking responsiveness, WindPanel updates your site context in real time.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          {
+            steps.map((step) => (
+              <div class="flex items-center gap-5 p-5 bg-card border border-border rounded-2xl transition-all hover:-translate-x-1 duration-200">
+                <span class="text-lg font-mono font-black text-primary bg-muted w-12 h-12 flex items-center justify-center rounded-xl border border-border shrink-0">{step.num}</span>
+                <div>
+                  <h4 class="font-extrabold text-foreground tracking-tight">{step.title}</h4>
+                  <p class="text-xs text-muted-foreground mt-1 leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Embed / Call to Action Box -->
+    <section class="max-w-6xl mx-auto px-6 py-20">
+      <div class="bg-card text-card-foreground rounded-3xl p-8 sm:p-12 border border-primary/25 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
+        
+        <!-- Subtle gradient overlay -->
+        <div class="absolute inset-0 opacity-15 bg-gradient-to-br from-white/10 via-transparent to-black/10 pointer-events-none rounded-3xl"></div>
+        
+        <div class="relative max-w-2xl">
+          <span class="inline-flex items-center rounded-full border border-primary/30 bg-muted px-3 py-1 text-xs font-bold tracking-widest text-primary uppercase">
+            Try Without Installing
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black mt-4 tracking-tight leading-none text-card-foreground">
+            Explore the embedded demo.
+          </h2>
+          <p class="text-muted-foreground text-sm mt-4 leading-relaxed">
+            The demo injects our actual Svelte theme-panel directly in the webpage. You can test active selectors, tweak OKLCH colors, switch custom dark-contrast presets, and export clean Tailwind CSS.
+          </p>
+        </div>
+
+        <a href="/embedded-demo" class="relative z-10 shrink-0">
+          <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 rounded-full font-bold cursor-pointer px-6">
+            Launch Embedded Demo
+          </Button>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ section -->
+    <section class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center mb-12">
+        <span class="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+          FAQ
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-black mt-3 tracking-tight">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        {
+          faqs.map((faq) => (
+            <div class="p-6 bg-card border border-border rounded-2xl hover:shadow-md transition-shadow">
+              <h3 class="font-extrabold text-foreground text-lg tracking-tight">{faq.q}</h3>
+              <p class="text-sm text-muted-foreground mt-3 leading-relaxed">{faq.a}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Technical Specs details -->
+    <section class="max-w-6xl mx-auto px-6 py-16">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="border border-border rounded-2xl p-6 bg-card">
+          <h4 class="font-extrabold text-sm uppercase tracking-wider text-primary">Permissions</h4>
+          <p class="text-xs text-muted-foreground mt-3 leading-relaxed">
+            Uses standard storage permissions for saving user presets and page access to inspect CSS theme variables on dev-mode websites.
+          </p>
+        </div>
+        <div class="border border-border rounded-2xl p-6 bg-card">
+          <h4 class="font-extrabold text-sm uppercase tracking-wider text-primary">Data model</h4>
+          <p class="text-xs text-muted-foreground mt-3 leading-relaxed">
+            Directly reads custom properties, mode selectors, active HTML classes, and computes variables using inline probes. No databases required.
+          </p>
+        </div>
+        <div class="border border-border rounded-2xl p-6 bg-card">
+          <h4 class="font-extrabold text-sm uppercase tracking-wider text-primary">Best fit</h4>
+          <p class="text-xs text-muted-foreground mt-3 leading-relaxed">
+            Projects built on Tailwind CSS v4, shadcn-compatible CSS custom properties, OKLCH palettes, and teams working with clean atomic layouts.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-6 py-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6 mt-16 bg-card rounded-3xl">
+      <a class="flex items-center gap-3 font-black text-base no-underline text-foreground hover:opacity-90" href="/">
+        <img class="w-8 h-8" src="/windpanel-icon.png" alt="WindPanel Logo" />
+        <span>WindPanel</span>
+      </a>
+      <p class="text-xs text-muted-foreground text-center md:text-left max-w-md leading-relaxed">
+        Modern theme inspection, preset saving, and oklch color tweaking workflows for standard Tailwind CSS.
+      </p>
+      <a class="text-xs font-semibold text-foreground hover:underline" href="/embedded-demo">Embedded Demo</a>
     </footer>
+
   </main>
 
   <script>
     const palettes = {
       light: {
-        page: "#fffaf0",
-        card: "#ffffff",
-        text: "#17130f",
-        muted: "#6a5f51",
-        primary: "oklch(0.49 0.27 292.58)",
-        accent: "oklch(0.9 0.2 126.66)",
-        background: "oklch(0.94 0.04 83)",
+        page: "oklch(0.99 0.006 255)",
+        card: "oklch(1 0 0)",
+        text: "oklch(0.16 0.025 263)",
+        muted: "oklch(0.49 0.04 263)",
+        primary: "oklch(0.77 0.1 212.35)",
+        accent: "oklch(0.7 0.14 190)",
+        background: "oklch(0.955 0.015 255)",
       },
       dark: {
-        page: "#16130f",
-        card: "#241f19",
-        text: "#fffaf0",
-        muted: "#b8ad9d",
-        primary: "oklch(0.68 0.2 292)",
+        page: "oklch(0.17 0.025 263)",
+        card: "oklch(0.22 0.032 263)",
+        text: "oklch(0.96 0.018 255)",
+        muted: "oklch(0.74 0.045 255)",
+        primary: "oklch(0.77 0.1 212.35)",
         accent: "oklch(0.72 0.14 155)",
-        background: "oklch(0.22 0.02 65)",
+        background: "oklch(0.29 0.035 263)",
       },
       dim: {
-        page: "#13212a",
-        card: "#1d303b",
-        text: "#eaf6f7",
-        muted: "#9fb5bb",
-        primary: "oklch(0.68 0.17 230)",
+        page: "oklch(0.2 0.02 245)",
+        card: "oklch(0.25 0.025 245)",
+        text: "oklch(0.9 0.02 245)",
+        muted: "oklch(0.72 0.03 245)",
+        primary: "oklch(0.77 0.1 212.35)",
         accent: "oklch(0.7 0.14 190)",
         background: "oklch(0.25 0.025 245)",
       },
@@ -202,6 +399,7 @@ const steps = [
 
     const demo = document.querySelector("[data-product-demo]")
     const buttons = document.querySelectorAll("[data-preview-mode]")
+    
     function applyPreviewMode(mode) {
       const palette = palettes[mode] || palettes.light
       demo?.style.setProperty("--demo-page", palette.page)
@@ -213,7 +411,9 @@ const steps = [
       demo?.style.setProperty("--demo-background", palette.background)
 
       for (const button of buttons) {
-        button.classList.toggle("active", button.getAttribute("data-preview-mode") === mode)
+        const isActive = button.getAttribute("data-preview-mode") === mode
+        button.classList.toggle("bg-card", isActive)
+        button.classList.toggle("shadow-sm", isActive)
       }
     }
 
@@ -224,715 +424,3 @@ const steps = [
     applyPreviewMode("light")
   </script>
 </Layout>
-
-<style>
-  :global(html),
-  :global(body) {
-    margin: 0;
-    background: #f7f2e8;
-  }
-
-  .landing-shell {
-    --radius: 16px;
-    --paper: #f7f2e8;
-    --ink: #16130f;
-    --muted: #6c6254;
-    --line: rgba(22, 19, 15, 0.13);
-    --surface: #fffaf0;
-    min-height: 100svh;
-    padding-bottom: 24px;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  }
-
-  .hero,
-  .metric-strip,
-  .feature-section,
-  .workflow-section,
-  .demo-callout,
-  .extension-info,
-  .footer {
-    width: min(1160px, calc(100% - 40px));
-    margin: 0 auto;
-  }
-
-  .hero {
-    padding: 22px 0 52px;
-  }
-
-  .topbar,
-  .brand,
-  .hero-actions,
-  .mini-head,
-  .mini-tokens div,
-  .footer {
-    display: flex;
-    align-items: center;
-  }
-
-  .topbar {
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 34px;
-  }
-
-  .brand {
-    gap: 10px;
-    color: inherit;
-    font-weight: 900;
-    text-decoration: none;
-  }
-
-  .brand img,
-  .mini-head img {
-    width: 36px;
-    height: 36px;
-  }
-
-  .topbar > a:not(.brand),
-  .footer > a:not(.brand) {
-    color: var(--ink);
-    font-size: 14px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1fr);
-    gap: 36px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .kicker {
-    margin: 0;
-    color: #77623d;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .hero-copy h1,
-  .section-copy h2,
-  .demo-callout h2,
-  .extension-info h2 {
-    margin: 10px 0 0;
-    letter-spacing: 0;
-    line-height: 0.98;
-  }
-
-  .hero-copy h1 {
-    max-width: 680px;
-    font-size: clamp(42px, 5.8vw, 74px);
-  }
-
-  .hero-copy,
-  .product-demo {
-    min-width: 0;
-  }
-
-  .lede {
-    max-width: 620px;
-    margin: 20px 0 0;
-    color: #3d352b;
-    font-size: clamp(18px, 2vw, 22px);
-    line-height: 1.45;
-  }
-
-  .hero-actions {
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 26px;
-  }
-
-  .primary-cta,
-  .secondary-cta,
-  .demo-callout a {
-    display: inline-flex;
-    min-height: 46px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    background: var(--ink);
-    color: #fffaf0;
-    padding: 0 18px;
-    font-size: 14px;
-    font-weight: 900;
-    text-decoration: none;
-  }
-
-  .secondary-cta {
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--ink);
-  }
-
-  .hero-actions span {
-    max-width: 260px;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  .product-demo {
-    --demo-page: #fffaf0;
-    --demo-card: #ffffff;
-    --demo-text: #17130f;
-    --demo-muted: #6a5f51;
-    --demo-primary: oklch(0.49 0.27 292.58);
-    --demo-accent: oklch(0.9 0.2 126.66);
-    --demo-background: oklch(0.94 0.04 83);
-    position: relative;
-    display: grid;
-    min-height: 430px;
-    padding: 14px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--demo-page) 88%, white);
-    box-shadow: 0 24px 70px rgba(42, 34, 22, 0.16);
-    transition: background 180ms ease;
-  }
-
-  .website-card,
-  .mini-panel,
-  .feature-grid article,
-  .workflow-section li,
-  .demo-callout,
-  .extension-info,
-  .metric-strip,
-  .footer {
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-  }
-
-  .website-card {
-    overflow: hidden;
-    background: var(--demo-card);
-    color: var(--demo-text);
-    transition:
-      background 180ms ease,
-      color 180ms ease;
-  }
-
-  .window-bar {
-    display: flex;
-    gap: 7px;
-    padding: 14px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .window-bar span {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: currentColor;
-    opacity: 0.18;
-  }
-
-  .website-content {
-    padding: 28px;
-  }
-
-  .website-content p,
-  .mini-head span {
-    margin: 0;
-    color: var(--demo-muted);
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .website-content h2 {
-    max-width: 360px;
-    margin: 8px 0 0;
-    font-size: clamp(34px, 6vw, 62px);
-    line-height: 0.95;
-  }
-
-  .sample-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 28px;
-  }
-
-  .sample-row span,
-  .mini-tokens span {
-    background: var(--demo-primary);
-  }
-
-  .sample-row span {
-    width: 86px;
-    height: 56px;
-    border-radius: 12px;
-  }
-
-  .sample-row span:nth-child(2),
-  .mini-tokens [data-dot="accent"] {
-    background: var(--demo-accent);
-  }
-
-  .sample-row span:nth-child(3),
-  .mini-tokens [data-dot="background"] {
-    background: var(--demo-background);
-  }
-
-  .sample-chart {
-    display: flex;
-    align-items: end;
-    gap: 8px;
-    height: 110px;
-    margin-top: 28px;
-  }
-
-  .sample-chart span {
-    width: 42px;
-    border-radius: 10px 10px 0 0;
-    background: var(--demo-accent);
-  }
-
-  .sample-chart span:nth-child(1) {
-    height: 84%;
-  }
-
-  .sample-chart span:nth-child(2) {
-    height: 58%;
-    background: var(--demo-primary);
-  }
-
-  .sample-chart span:nth-child(3) {
-    height: 74%;
-  }
-
-  .sample-chart span:nth-child(4) {
-    height: 42%;
-    background: var(--demo-primary);
-  }
-
-  .mini-panel {
-    position: absolute;
-    right: 28px;
-    bottom: 28px;
-    width: min(330px, calc(100% - 56px));
-    padding: 14px;
-    background: rgba(255, 255, 255, 0.78);
-    box-shadow: 0 18px 60px rgba(31, 24, 15, 0.18);
-    backdrop-filter: blur(18px);
-  }
-
-  .mini-head {
-    gap: 10px;
-  }
-
-  .mini-head strong {
-    display: block;
-    margin-top: 2px;
-    font-size: 20px;
-  }
-
-  .mini-segments {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    margin-top: 14px;
-    padding: 4px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #ece7dc;
-  }
-
-  .mini-segments button {
-    min-height: 32px;
-    border: 0;
-    border-radius: 9px;
-    background: transparent;
-    color: #3d352b;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 900;
-  }
-
-  .mini-segments button.active {
-    background: #fffaf0;
-    box-shadow: 0 1px 4px rgba(22, 19, 15, 0.12);
-  }
-
-  .mini-tokens {
-    display: grid;
-    gap: 9px;
-    margin-top: 14px;
-  }
-
-  .mini-tokens div {
-    gap: 10px;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #fffaf0;
-  }
-
-  .mini-tokens span {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-  }
-
-  .mini-tokens code {
-    color: #17130f;
-    font-size: 12px;
-    font-weight: 800;
-  }
-
-  .metric-strip {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    margin-top: 10px;
-    overflow: hidden;
-    background: var(--surface);
-  }
-
-  .metric-strip div {
-    padding: 18px;
-  }
-
-  .metric-strip div + div {
-    border-left: 1px solid var(--line);
-  }
-
-  .metric-strip strong,
-  .metric-strip span {
-    display: block;
-  }
-
-  .metric-strip strong {
-    font-size: 15px;
-  }
-
-  .metric-strip span {
-    margin-top: 5px;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.35;
-  }
-
-  .feature-section,
-  .workflow-section,
-  .extension-info {
-    padding: 64px 0 0;
-  }
-
-  .feature-intro {
-    display: grid;
-    grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1fr);
-    gap: 24px;
-    align-items: stretch;
-    margin-bottom: 14px;
-  }
-
-  .feature-title-card,
-  .feature-summary-card {
-    min-height: 220px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  .feature-title-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 24px;
-  }
-
-  .feature-summary-card {
-    display: grid;
-    align-content: space-between;
-    gap: 24px;
-    padding: 24px;
-  }
-
-  .feature-summary-card p {
-    max-width: 760px;
-    margin: 0;
-    color: var(--muted);
-    font-size: clamp(18px, 2vw, 23px);
-    line-height: 1.35;
-  }
-
-  .summary-points {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .summary-points span {
-    display: grid;
-    min-height: 42px;
-    place-items: center;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    color: var(--ink);
-    font-size: 13px;
-    font-weight: 900;
-  }
-
-  .section-copy {
-    display: grid;
-    grid-template-columns: 0.78fr 1fr;
-    gap: 32px;
-    align-items: end;
-    margin-bottom: 18px;
-  }
-
-  .section-copy h2,
-  .feature-intro h2,
-  .demo-callout h2,
-  .extension-info h2 {
-    max-width: 720px;
-    font-size: clamp(32px, 5vw, 58px);
-  }
-
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-
-  .feature-grid article {
-    min-height: 210px;
-    padding: 18px;
-    background: var(--surface);
-  }
-
-  .feature-grid h3 {
-    margin: 0;
-    font-size: 21px;
-  }
-
-  .feature-grid p,
-  .demo-callout p,
-  .extension-info dd,
-  .footer p {
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .feature-grid p {
-    margin: 14px 0 0;
-    font-size: 14px;
-  }
-
-  .workflow-section {
-    display: grid;
-    grid-template-columns: 0.85fr 1fr;
-    gap: 34px;
-  }
-
-  .workflow-section .section-copy {
-    display: block;
-    margin: 0;
-  }
-
-  .workflow-section ol {
-    display: grid;
-    gap: 10px;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-
-  .workflow-section li {
-    display: grid;
-    grid-template-columns: 54px 1fr;
-    gap: 14px;
-    align-items: center;
-    padding: 16px;
-    background: var(--surface);
-  }
-
-  .workflow-section li span {
-    color: #77623d;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-weight: 900;
-  }
-
-  .workflow-section li p {
-    margin: 0;
-    font-weight: 800;
-  }
-
-  .demo-callout {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 28px;
-    align-items: end;
-    margin-top: 64px;
-    padding: 24px;
-    background: #17130f;
-    color: #fffaf0;
-  }
-
-  .demo-callout p {
-    max-width: 680px;
-    margin: 16px 0 0;
-    color: #d8cfc0;
-  }
-
-  .demo-callout a {
-    background: #fffaf0;
-    color: #17130f;
-  }
-
-  .extension-info {
-    display: grid;
-    grid-template-columns: 0.8fr 1fr;
-    gap: 34px;
-  }
-
-  .extension-info {
-    border: 0;
-  }
-
-  .extension-info dl {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-  }
-
-  .extension-info dl div {
-    padding: 16px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  .extension-info dt {
-    font-weight: 900;
-  }
-
-  .extension-info dd {
-    margin: 6px 0 0;
-    font-size: 14px;
-  }
-
-  .footer {
-    justify-content: space-between;
-    gap: 18px;
-    margin-top: 64px;
-    margin-bottom: 0;
-    padding: 18px;
-    background: var(--surface);
-  }
-
-  .footer p {
-    max-width: 520px;
-    margin: 0;
-    font-size: 14px;
-  }
-
-  @media (max-width: 960px) {
-    .hero-grid,
-    .feature-intro,
-    .section-copy,
-    .workflow-section,
-    .extension-info,
-    .demo-callout {
-      grid-template-columns: 1fr;
-    }
-
-    .product-demo {
-      min-height: 390px;
-    }
-
-    .feature-grid,
-    .metric-strip {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .metric-strip div + div {
-      border-left: 0;
-      border-top: 1px solid var(--line);
-    }
-  }
-
-  @media (max-width: 620px) {
-    .hero,
-    .metric-strip,
-    .feature-section,
-    .workflow-section,
-    .demo-callout,
-    .extension-info,
-    .footer {
-      width: min(100% - 24px, 1160px);
-    }
-
-    .topbar,
-    .footer {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .hero-copy h1 {
-      max-width: 330px;
-      font-size: 30px;
-      line-height: 1.04;
-    }
-
-    .hero-copy {
-      width: 100%;
-      max-width: calc(100vw - 24px);
-    }
-
-    .lede {
-      max-width: 330px;
-      font-size: 16px;
-    }
-
-    .hero-actions {
-      display: grid;
-      width: min(100%, 330px);
-      grid-template-columns: 1fr;
-    }
-
-    .primary-cta,
-    .secondary-cta {
-      width: 100%;
-    }
-
-    .product-demo {
-      min-height: 520px;
-    }
-
-    .mini-panel {
-      right: 14px;
-      bottom: 14px;
-      width: calc(100% - 28px);
-    }
-
-    .website-content {
-      padding: 20px;
-    }
-
-    .website-content h2 {
-      font-size: 40px;
-    }
-
-    .feature-grid,
-    .feature-intro,
-    .metric-strip {
-      grid-template-columns: 1fr;
-    }
-
-    .feature-title-card,
-    .feature-summary-card {
-      min-height: auto;
-    }
-
-    .summary-points {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-</style>
