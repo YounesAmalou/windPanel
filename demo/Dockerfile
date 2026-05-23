@@ -1,13 +1,14 @@
-FROM oven/bun AS builder
+FROM oven/bun:1 AS builder
 
-WORKDIR /app
+WORKDIR /app/demo
 
-COPY package.json bun.lock ./
+COPY demo/package.json demo/bun.lock ./
 RUN bun install --frozen-lockfile
 
-COPY . .
+COPY demo /app/demo
+COPY src /app/src
 RUN bun run build
 
-FROM nginx:alpine
+FROM nginx:1.27-alpine
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/demo/dist /usr/share/nginx/html
