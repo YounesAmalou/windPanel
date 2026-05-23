@@ -1,0 +1,195 @@
+---
+import { Button } from "@/components/ui/button"
+import EmbeddedThemePanel from "./EmbeddedThemePanel.svelte"
+
+type Props = {
+  embedded?: boolean
+}
+
+const { embedded = false } = Astro.props
+
+const themeModes = [
+  { id: "default", label: "Light", selector: ":root" },
+  { id: "html-dark", label: "Dark", selector: "html.dark" },
+  { id: "body-contrast", label: "High contrast", selector: "body.high-contrast" },
+  { id: "html-dim", label: "Dim", selector: 'html[data-theme="dim"]' },
+  { id: "body-sepia", label: "Sepia", selector: 'body[data-theme="sepia"]' },
+]
+---
+
+<main class="min-h-svh bg-background p-6 text-foreground transition-colors">
+  <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[280px_1fr]">
+    <aside class="rounded-2xl border border-sidebar-border bg-sidebar p-4 text-sidebar-foreground">
+      <div class="mb-5">
+        <p class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          {embedded ? "Embedded panel demo" : "Extension demo"}
+        </p>
+        <h1 class="mt-1 text-2xl font-semibold">Theme mode harness</h1>
+        <p class="mt-2 text-xs leading-5 text-muted-foreground">
+          Only selectors with a complete Tailwind theme surface are listed here.
+        </p>
+      </div>
+
+      <div class="grid gap-2" data-theme-controls>
+        {
+          themeModes.map((mode) => (
+            <button
+              class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted aria-[current=true]:border-primary aria-[current=true]:bg-primary/10"
+              data-theme-mode={mode.id}
+            >
+              <span class="block">{mode.label}</span>
+              <span class="mt-1 block font-mono text-[11px] text-muted-foreground">{mode.selector}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="mt-5 rounded-xl border border-sidebar-border bg-sidebar-accent p-3 text-sidebar-accent-foreground">
+        <p class="text-xs font-semibold text-muted-foreground uppercase">Active website selector</p>
+        <p class="mt-1 font-mono text-xs" data-theme-status>:root</p>
+      </div>
+
+      <nav class="mt-5 grid gap-2 text-sm">
+        <a class="rounded-lg border border-border bg-background px-3 py-2 font-medium hover:bg-muted" href="/">
+          Landing page
+        </a>
+        <a
+          class="rounded-lg border border-border bg-background px-3 py-2 font-semibold text-foreground hover:bg-muted"
+          href="https://chromewebstore.google.com/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Install extension
+        </a>
+        <a class="rounded-lg border border-border bg-background px-3 py-2 font-medium hover:bg-muted" href="/extension-demo">
+          Extension harness
+        </a>
+        <a class="rounded-lg border border-border bg-background px-3 py-2 font-medium hover:bg-muted" href="/embedded-demo">
+          Embedded panel
+        </a>
+      </nav>
+    </aside>
+
+    <section class="grid gap-6">
+      <div class="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p class="text-sm font-medium text-muted-foreground">Live token surface</p>
+            <h2 class="mt-1 text-3xl font-semibold tracking-tight">
+              {embedded ? "Edit variables from the embedded component" : "Edit variables from the extension panel"}
+            </h2>
+            <p class="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+              This page exposes Tailwind 4 shadcn-style CSS variables through multiple selectors so WindPanel can test detection,
+              active mode sync, variable overrides, and CSS export.
+            </p>
+          </div>
+          <Button client:load>Primary action</Button>
+        </div>
+
+        <div class="mt-6 grid gap-3 sm:grid-cols-3">
+          <div class="rounded-xl border border-border bg-background p-4">
+            <p class="text-xs font-semibold text-muted-foreground uppercase">Primary</p>
+            <div class="mt-3 h-12 rounded-lg bg-primary"></div>
+            <p class="mt-3 font-mono text-xs text-muted-foreground">--primary</p>
+          </div>
+          <div class="rounded-xl border border-border bg-background p-4">
+            <p class="text-xs font-semibold text-muted-foreground uppercase">Accent</p>
+            <div class="mt-3 h-12 rounded-lg bg-accent"></div>
+            <p class="mt-3 font-mono text-xs text-muted-foreground">--accent</p>
+          </div>
+          <div class="rounded-xl border border-border bg-background p-4">
+            <p class="text-xs font-semibold text-muted-foreground uppercase">Radius</p>
+            <div class="mt-3 h-12 rounded-lg border-4 border-primary bg-secondary"></div>
+            <p class="mt-3 font-mono text-xs text-muted-foreground">--radius</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <section class="rounded-2xl border border-border bg-card p-5">
+          <h3 class="font-semibold">Chart tokens</h3>
+          <div class="mt-4 flex h-44 items-end gap-3">
+            <div class="w-full rounded-t-lg bg-chart-1" style="height: 88%"></div>
+            <div class="w-full rounded-t-lg bg-chart-2" style="height: 68%"></div>
+            <div class="w-full rounded-t-lg bg-chart-3" style="height: 52%"></div>
+            <div class="w-full rounded-t-lg bg-chart-4" style="height: 76%"></div>
+            <div class="w-full rounded-t-lg bg-chart-5" style="height: 40%"></div>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-border bg-card p-5">
+          <h3 class="font-semibold">Parser samples</h3>
+          <pre class="mt-4 overflow-auto rounded-xl border border-border bg-muted p-4 text-xs text-muted-foreground"><code>:root &#123;
+  --background: oklch(1 0 0);
+  --primary: oklch(0.52 0.24 292);
+&#125;
+
+[data-theme="dim"] &#123;
+  --background: oklch(0.2 0.02 245);
+&#125;</code></pre>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  {
+    embedded && (
+      <EmbeddedThemePanel client:load />
+    )
+  }
+</main>
+
+<script define:vars={{ themeModes }}>
+  const html = document.documentElement
+  const body = document.body
+  const status = document.querySelector("[data-theme-status]")
+  const buttons = document.querySelectorAll("[data-theme-mode]")
+  const labels = Object.fromEntries(themeModes.map((mode) => [mode.id, mode.selector]))
+
+  const resetTheme = () => {
+    html.classList.remove("dark")
+    body.classList.remove("high-contrast")
+    html.removeAttribute("data-theme")
+    body.removeAttribute("data-theme")
+  }
+
+  const modeFromCurrentPageState = () => {
+    let mode = "default"
+    if (html.classList.contains("dark")) mode = "html-dark"
+    else if (body.classList.contains("high-contrast")) mode = "body-contrast"
+    else if (html.getAttribute("data-theme") === "dim") mode = "html-dim"
+    else if (body.getAttribute("data-theme") === "sepia") mode = "body-sepia"
+
+    return mode
+  }
+
+  const syncControls = (mode, selector = labels[mode] || ":root") => {
+    if (status) status.textContent = selector
+
+    for (const button of buttons) {
+      button.toggleAttribute("aria-current", button.getAttribute("data-theme-mode") === mode)
+    }
+  }
+
+  const applyTheme = (mode) => {
+    resetTheme()
+
+    if (mode === "html-dark") html.classList.add("dark")
+    if (mode === "body-contrast") body.classList.add("high-contrast")
+    if (mode === "html-dim") html.setAttribute("data-theme", "dim")
+    if (mode === "body-sepia") body.setAttribute("data-theme", "sepia")
+
+    syncControls(mode)
+  }
+
+  for (const button of buttons) {
+    button.addEventListener("click", () => applyTheme(button.getAttribute("data-theme-mode") || "default"))
+  }
+
+  document.addEventListener("windpanel-demo-mode-change", (event) => {
+    const detail = event.detail || {}
+    syncControls(detail.modeId || "default", detail.selector)
+  })
+
+  syncControls(modeFromCurrentPageState())
+</script>
