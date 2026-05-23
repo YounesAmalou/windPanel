@@ -8,6 +8,6 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
-FROM nginx:1.27-alpine
+FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
