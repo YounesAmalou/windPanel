@@ -1,135 +1,426 @@
 ---
 import Layout from "@/layouts/main.astro"
 import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
-const themeModes = [
-  { id: "default", label: "Light", selector: ":root" },
-  { id: "html-dark", label: "Dark", selector: "html.dark" },
-  { id: "body-contrast", label: "High contrast", selector: "body.high-contrast" },
-  { id: "html-dim", label: "Dim", selector: 'html[data-theme="dim"]' },
-  { id: "body-sepia", label: "Sepia", selector: 'body[data-theme="sepia"]' },
+const features = [
+  {
+    title: "Detect real modes",
+    description: "Find complete Tailwind 4 theme surfaces across :root, class selectors, body classes, and data-theme attributes.",
+    badge: "Detection Engine"
+  },
+  {
+    title: "Edit with context",
+    description: "Change OKLCH colors, radius, shadows, typography, and raw CSS while previewing the result against the page.",
+    badge: "Visual Editor"
+  },
+  {
+    title: "Preserve presets",
+    description: "Save imported or hand-tuned themes locally so the same palette is ready the next time you open the browser.",
+    badge: "Local Presets"
+  },
+  {
+    title: "Export clean CSS",
+    description: "Copy the whole theme or a single mode when you are ready to move changes back into your project.",
+    badge: "Production Ready"
+  },
+]
+
+const steps = [
+  {
+    num: "01",
+    title: "Mount on site",
+    desc: "Open the embedded demo or any supported Tailwind site in your browser."
+  },
+  {
+    num: "02",
+    title: "Read active state",
+    desc: "WindPanel reads the active selectors and mode variables directly from page state."
+  },
+  {
+    num: "03",
+    title: "Tune values live",
+    desc: "Use the UI dials to tweak OKLCH colors, radius, shadows, or paste direct CSS overrides."
+  },
+  {
+    num: "04",
+    title: "Export back to project",
+    desc: "Copy the generated Tailwind CSS variables and place them back in your global stylesheet."
+  }
+]
+
+const faqs = [
+  {
+    q: "How does theme detection work under the hood?",
+    a: "WindPanel content scripts scan your page for standard Tailwind / shadcn CSS custom properties like --background, --primary, and --radius. It reads their computed values and temporary probe stylesheets to detect complete mode differences."
+  },
+  {
+    q: "Do I need to change my build configuration to use it?",
+    a: "No! WindPanel inspects standard, unminified CSS custom properties in your dev environment. It works out of the box with standard Tailwind CSS v4 and shadcn components without any build plugins."
+  },
+  {
+    q: "Are my theme edits sent to any external servers?",
+    a: "Absolutely not. WindPanel is completely local-first and privacy-respecting. All theme definitions, presets, and customized values are saved purely inside the browser's local storage."
+  },
+  {
+    q: "Does it support custom selectors or attributes?",
+    a: "Yes! It automatically detects common theme conventions (e.g., class='dark', data-theme='dim', data-color-scheme='dark') and lets you sync controls with whichever selector your website uses."
+  }
 ]
 ---
 
-<Layout>
-  <main class="min-h-svh bg-background p-6 text-foreground transition-colors">
-    <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[280px_1fr]">
-      <aside class="rounded-2xl border border-sidebar-border bg-sidebar p-4 text-sidebar-foreground">
-        <div class="mb-5">
-          <p class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">WindPanel demo</p>
-          <h1 class="mt-1 text-2xl font-semibold">Theme mode harness</h1>
-          <p class="mt-2 text-xs leading-5 text-muted-foreground">Only selectors with a complete Tailwind theme surface are listed here.</p>
+<Layout title="WindPanel - Tailwind Theme Editor">
+  <main class="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-accent/30 pb-16">
+    
+    <!-- Top Navigation -->
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <a class="flex items-center gap-3 font-black text-xl tracking-tight no-underline text-foreground hover:opacity-90 transition-opacity" href="/">
+        <img class="w-9 h-9" src="/windpanel-icon.png" alt="WindPanel Logo" />
+        <span>WindPanel</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <a class="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors" href="/embedded-demo">Embedded Demo</a>
+        <a href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer">
+          <Button variant="outline" size="sm" className="hidden sm:inline-flex cursor-pointer">
+            Install Extension
+          </Button>
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="max-w-6xl mx-auto px-6 pt-12 pb-20">
+      <div class="grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
+        
+        <!-- Hero Left / Call to Action -->
+        <div class="flex flex-col items-start text-left">
+          <span class="mb-6 inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+            Tailwind CSS 4 Theme Workbench
+          </span>
+          
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[0.95] text-foreground">
+            Inspect and tune live CSS variables instantly.
+          </h1>
+          
+          <p class="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl">
+            WindPanel automatically scans your website for Tailwind theme modes, presents a premium editor interface, and maps variables live so you can iterate on brand styles directly in the browser.
+          </p>
+          
+          <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+            <a href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold cursor-pointer transition-transform hover:-translate-y-0.5">
+                Install from Chrome
+              </Button>
+            </a>
+            <a href="/embedded-demo" class="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full font-bold cursor-pointer transition-transform hover:-translate-y-0.5">
+                View Embedded Demo
+              </Button>
+            </a>
+          </div>
+          
+          <span class="mt-4 text-xs text-muted-foreground font-medium block">
+            Local-first extension, no analytics or tracking code.
+          </span>
         </div>
 
-        <div class="grid gap-2" data-theme-controls>
-          {themeModes.map((mode) => (
-            <button class="rounded-lg border border-border bg-card px-3 py-2 text-left text-sm font-medium hover:bg-muted aria-[current=true]:border-primary aria-[current=true]:bg-primary/10" data-theme-mode={mode.id}>
-              <span class="block">{mode.label}</span>
-              <span class="mt-1 block font-mono text-[11px] text-muted-foreground">{mode.selector}</span>
-            </button>
-          ))}
-        </div>
-
-        <div class="mt-5 rounded-xl border border-sidebar-border bg-sidebar-accent p-3 text-sidebar-accent-foreground">
-          <p class="text-xs font-semibold uppercase text-muted-foreground">Active website selector</p>
-          <p class="mt-1 font-mono text-xs" data-theme-status>:root</p>
-        </div>
-      </aside>
-
-      <section class="grid gap-6">
-        <div class="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p class="text-sm font-medium text-muted-foreground">Live token surface</p>
-              <h2 class="mt-1 text-3xl font-semibold tracking-tight">Edit variables from the extension panel</h2>
-              <p class="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-                This page exposes Tailwind 4 shadcn-style CSS variables through multiple selectors so WindPanel can test detection,
-                active mode sync, variable overrides, and CSS export.
-              </p>
+        <!-- Interactive Hero Right / Product Mockup -->
+        <div class="relative w-full aspect-[4/3] rounded-3xl border border-border p-4 transition-all duration-300 shadow-xl overflow-hidden bg-[color-mix(in_srgb,var(--demo-page,rgba(255,250,240,0.8))_90%,white)]" data-product-demo>
+          
+          <!-- Mockup Website Window -->
+          <div class="w-full h-full rounded-2xl bg-[var(--demo-card,oklch(1_0_0))] text-[var(--demo-text,oklch(0.16_0.025_263))] transition-all duration-200 border border-border shadow-sm flex flex-col overflow-hidden">
+            
+            <!-- Window Title Bar -->
+            <div class="flex items-center gap-1.5 px-4 py-3 border-b border-border">
+              <span class="w-2.5 h-2.5 rounded-full bg-current opacity-20"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-current opacity-20"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-current opacity-20"></span>
+              <span class="ml-4 text-[10px] font-mono opacity-45">my-tailwind-project.dev</span>
             </div>
-            <Button client:load>Primary action</Button>
+            
+            <!-- Website Content Preview -->
+            <div class="p-6 sm:p-8 flex flex-col flex-1 justify-between select-none">
+              <div>
+                <p class="text-[10px] uppercase tracking-wider font-extrabold text-[var(--demo-muted,oklch(0.49_0.04_263))]">Live Surface Preview</p>
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-1 leading-none text-[var(--demo-text,oklch(0.16_0.025_263))] transition-colors">
+                  Theme Colors
+                </h2>
+                
+                <!-- Swatches inside website -->
+                <div class="flex gap-2.5 mt-6">
+                  <div class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl border-2 border-[var(--demo-primary,oklch(0.77_0.1_212.35))] transition-all duration-150 bg-transparent" title="Primary color swatch"></div>
+                  <div class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl transition-all duration-150 shadow-inner bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" title="Accent color swatch"></div>
+                  <div class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl transition-all duration-150 shadow-inner bg-[var(--demo-background,oklch(0.94_0.04_83))]" title="Background color swatch"></div>
+                </div>
+              </div>
+
+              <!-- Mini chart to show variables effect -->
+              <div class="flex items-end gap-2 h-20 sm:h-24 mt-4 overflow-hidden border-b border-border/40">
+                <div class="w-full rounded-t-lg transition-all duration-300 bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" style="height: 84%"></div>
+                <div class="w-full rounded-t-lg transition-all duration-300 border-2 border-b-0 border-[var(--demo-primary,oklch(0.77_0.1_212.35))]" style="height: 52%"></div>
+                <div class="w-full rounded-t-lg transition-all duration-300 bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" style="height: 74%"></div>
+                <div class="w-full rounded-t-lg transition-all duration-300 border-2 border-b-0 border-[var(--demo-primary,oklch(0.77_0.1_212.35))]" style="height: 38%"></div>
+              </div>
+            </div>
           </div>
 
-          <div class="mt-6 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-xl border border-border bg-background p-4">
-              <p class="text-xs font-semibold text-muted-foreground uppercase">Primary</p>
-              <div class="mt-3 h-12 rounded-lg bg-primary"></div>
-              <p class="mt-3 font-mono text-xs text-muted-foreground">--primary</p>
+          <!-- Floating Injected Extension Panel Mockup -->
+          <div class="absolute right-8 bottom-8 w-[240px] sm:w-[280px] p-4 bg-card/80 border border-border rounded-2xl shadow-2xl backdrop-blur-md flex flex-col gap-3 transition-transform duration-300 hover:scale-[1.02]">
+            <div class="flex items-center gap-2.5">
+              <img class="w-8 h-8 rounded-lg shadow-sm" src="/windpanel-icon.png" alt="" />
+              <div>
+                <span class="text-[10px] uppercase tracking-wider font-extrabold text-muted-foreground">WindPanel</span>
+                <strong class="block text-sm font-black leading-tight mt-0.5 text-card-foreground">Mock Workbench</strong>
+              </div>
             </div>
-            <div class="rounded-xl border border-border bg-background p-4">
-              <p class="text-xs font-semibold text-muted-foreground uppercase">Accent</p>
-              <div class="mt-3 h-12 rounded-lg bg-accent"></div>
-              <p class="mt-3 font-mono text-xs text-muted-foreground">--accent</p>
+            
+            <!-- Segment Controls -->
+            <div class="grid grid-cols-3 gap-1 bg-muted p-1 rounded-xl text-xs font-bold text-foreground" aria-label="Mock mode toggle">
+              <button type="button" class="py-1 rounded-lg text-center transition-all bg-card shadow-sm" data-preview-mode="light">Light</button>
+              <button type="button" class="py-1 rounded-lg text-center transition-all hover:bg-card/40" data-preview-mode="dark">Dark</button>
+              <button type="button" class="py-1 rounded-lg text-center transition-all hover:bg-card/40" data-preview-mode="dim">Dim</button>
             </div>
-            <div class="rounded-xl border border-border bg-background p-4">
-              <p class="text-xs font-semibold text-muted-foreground uppercase">Radius</p>
-              <div class="mt-3 h-12 rounded-lg border-4 border-primary bg-secondary"></div>
-              <p class="mt-3 font-mono text-xs text-muted-foreground">--radius</p>
+            
+            <!-- Token Indicators -->
+            <div class="flex flex-col gap-1.5 text-xs">
+              <div class="flex items-center gap-2.5 px-2.5 py-2 border border-border rounded-xl bg-card">
+                <span class="w-3.5 h-3.5 rounded-md border-2 border-[var(--demo-primary,oklch(0.77_0.1_212.35))]" data-dot="primary"></span>
+                <code class="font-mono text-[10px] font-bold text-card-foreground">--primary</code>
+              </div>
+              <div class="flex items-center gap-2.5 px-2.5 py-2 border border-border rounded-xl bg-card">
+                <span class="w-3.5 h-3.5 rounded-md bg-[var(--demo-accent,oklch(0.9_0.2_126.66))]" data-dot="accent"></span>
+                <code class="font-mono text-[10px] font-bold text-card-foreground">--accent</code>
+              </div>
             </div>
           </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Highlights / Metrics Grid -->
+    <section class="max-w-6xl mx-auto px-6 py-8">
+      <div class="grid md:grid-cols-3 gap-6 rounded-3xl border border-border bg-card overflow-hidden p-2">
+        <div class="p-6 flex flex-col gap-2">
+          <Badge className="w-fit bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0 font-bold px-2 py-0.5">Tailwind v4</Badge>
+          <strong class="text-lg font-black mt-2">Theme Inline Workflows</strong>
+          <span class="text-sm text-muted-foreground leading-relaxed">Detects inline theme configurations, local variables, and full stylesheet overrides natively.</span>
+        </div>
+        <div class="p-6 flex flex-col gap-2 border-t md:border-t-0 md:border-l border-border">
+          <Badge className="w-fit bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0 font-bold px-2 py-0.5">Mode Aware</Badge>
+          <strong class="text-lg font-black mt-2">Flexible Selectors</strong>
+          <span class="text-sm text-muted-foreground leading-relaxed">Supports light, dark, custom dim modes, data attributes, class-based toggling, and media queries.</span>
+        </div>
+        <div class="p-6 flex flex-col gap-2 border-t md:border-t-0 md:border-l border-border">
+          <Badge className="w-fit bg-secondary text-secondary-foreground hover:bg-secondary/80 border-0 font-bold px-2 py-0.5">Privacy First</Badge>
+          <strong class="text-lg font-black mt-2">Zero Remote Code</strong>
+          <span class="text-sm text-muted-foreground leading-relaxed">No tracking, no third-party APIs. Presets are stored directly in your browser's private extension storage.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section using Card Components -->
+    <section class="max-w-6xl mx-auto px-6 py-20">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+          Key Capabilities
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black mt-4 tracking-tight leading-none">
+          Everything you need to customize your UI.
+        </h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {
+          features.map((feat) => (
+            <Card className="border-border bg-card hover:shadow-lg transition-all duration-300">
+              <CardHeader className="pb-3 px-6 pt-6">
+                <Badge variant="secondary" className="w-fit font-bold px-2 py-0.5">{feat.badge}</Badge>
+                <CardTitle className="text-xl font-extrabold mt-3 tracking-tight">{feat.title}</CardTitle>
+              </CardHeader>
+              <CardContent class="px-6 pb-6 pt-0">
+                <p class="text-sm text-muted-foreground leading-relaxed">{feat.description}</p>
+              </CardContent>
+            </Card>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Workflow section -->
+    <section class="max-w-6xl mx-auto px-6 py-12">
+      <div class="grid lg:grid-cols-[0.8fr_1fr] gap-12 items-start">
+        
+        <div>
+          <span class="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+            Workflows
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-black mt-4 tracking-tight leading-none">
+            Built to integrate with how you work.
+          </h2>
+          <p class="mt-6 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-md">
+            Instead of manual cycles modifying stylesheet values, reloading components, and checking responsiveness, WindPanel updates your site context in real time.
+          </p>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2">
-          <section class="rounded-2xl border border-border bg-card p-5">
-            <h3 class="font-semibold">Chart tokens</h3>
-            <div class="mt-4 flex h-44 items-end gap-3">
-              <div class="w-full rounded-t-lg bg-chart-1" style="height: 88%"></div>
-              <div class="w-full rounded-t-lg bg-chart-2" style="height: 68%"></div>
-              <div class="w-full rounded-t-lg bg-chart-3" style="height: 52%"></div>
-              <div class="w-full rounded-t-lg bg-chart-4" style="height: 76%"></div>
-              <div class="w-full rounded-t-lg bg-chart-5" style="height: 40%"></div>
+        <div class="flex flex-col gap-4">
+          {
+            steps.map((step) => (
+              <div class="flex items-center gap-5 p-5 bg-card border border-border rounded-2xl transition-all hover:-translate-x-1 duration-200">
+                <span class="text-lg font-mono font-black text-primary bg-muted w-12 h-12 flex items-center justify-center rounded-xl border border-border shrink-0">{step.num}</span>
+                <div>
+                  <h4 class="font-extrabold text-foreground tracking-tight">{step.title}</h4>
+                  <p class="text-xs text-muted-foreground mt-1 leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Embed / Call to Action Box -->
+    <section class="max-w-6xl mx-auto px-6 py-20">
+      <div class="bg-card text-card-foreground rounded-3xl p-8 sm:p-12 border border-primary/25 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative overflow-hidden">
+        
+        <!-- Subtle gradient overlay -->
+        <div class="absolute inset-0 opacity-15 bg-gradient-to-br from-white/10 via-transparent to-black/10 pointer-events-none rounded-3xl"></div>
+        
+        <div class="relative max-w-2xl">
+          <span class="inline-flex items-center rounded-full border border-primary/30 bg-muted px-3 py-1 text-xs font-bold tracking-widest text-primary uppercase">
+            Try Without Installing
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black mt-4 tracking-tight leading-none text-card-foreground">
+            Explore the embedded demo.
+          </h2>
+          <p class="text-muted-foreground text-sm mt-4 leading-relaxed">
+            The demo injects our actual Svelte theme-panel directly in the webpage. You can test active selectors, tweak OKLCH colors, switch custom dark-contrast presets, and export clean Tailwind CSS.
+          </p>
+        </div>
+
+        <a href="/embedded-demo" class="relative z-10 shrink-0">
+          <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 rounded-full font-bold cursor-pointer px-6">
+            Launch Embedded Demo
+          </Button>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ section -->
+    <section class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center mb-12">
+        <span class="inline-flex items-center rounded-full border border-border bg-muted px-3 py-1 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+          FAQ
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-black mt-3 tracking-tight">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        {
+          faqs.map((faq) => (
+            <div class="p-6 bg-card border border-border rounded-2xl hover:shadow-md transition-shadow">
+              <h3 class="font-extrabold text-foreground text-lg tracking-tight">{faq.q}</h3>
+              <p class="text-sm text-muted-foreground mt-3 leading-relaxed">{faq.a}</p>
             </div>
-          </section>
+          ))
+        }
+      </div>
+    </section>
 
-          <section class="rounded-2xl border border-border bg-card p-5">
-            <h3 class="font-semibold">Parser samples</h3>
-            <pre class="mt-4 overflow-auto rounded-xl border border-border bg-muted p-4 text-xs text-muted-foreground"><code>:root &#123;
-  --background: oklch(1 0 0);
-  --primary: oklch(0.52 0.24 292);
-&#125;
-
-[data-theme="dim"] &#123;
-  --background: oklch(0.2 0.02 245);
-&#125;</code></pre>
-          </section>
+    <!-- Technical Specs details -->
+    <section class="max-w-6xl mx-auto px-6 py-16">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="border border-border rounded-2xl p-6 bg-card">
+          <h4 class="font-extrabold text-sm uppercase tracking-wider text-primary">Permissions</h4>
+          <p class="text-xs text-muted-foreground mt-3 leading-relaxed">
+            Uses standard storage permissions for saving user presets and page access to inspect CSS theme variables on dev-mode websites.
+          </p>
         </div>
-      </section>
-    </div>
+        <div class="border border-border rounded-2xl p-6 bg-card">
+          <h4 class="font-extrabold text-sm uppercase tracking-wider text-primary">Data model</h4>
+          <p class="text-xs text-muted-foreground mt-3 leading-relaxed">
+            Directly reads custom properties, mode selectors, active HTML classes, and computes variables using inline probes. No databases required.
+          </p>
+        </div>
+        <div class="border border-border rounded-2xl p-6 bg-card">
+          <h4 class="font-extrabold text-sm uppercase tracking-wider text-primary">Best fit</h4>
+          <p class="text-xs text-muted-foreground mt-3 leading-relaxed">
+            Projects built on Tailwind CSS v4, shadcn-compatible CSS custom properties, OKLCH palettes, and teams working with clean atomic layouts.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-6 py-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-6 mt-16 bg-card rounded-3xl">
+      <a class="flex items-center gap-3 font-black text-base no-underline text-foreground hover:opacity-90" href="/">
+        <img class="w-8 h-8" src="/windpanel-icon.png" alt="WindPanel Logo" />
+        <span>WindPanel</span>
+      </a>
+      <p class="text-xs text-muted-foreground text-center md:text-left max-w-md leading-relaxed">
+        Modern theme inspection, preset saving, and oklch color tweaking workflows for standard Tailwind CSS.
+      </p>
+      <a class="text-xs font-semibold text-foreground hover:underline" href="/embedded-demo">Embedded Demo</a>
+    </footer>
+
   </main>
 
-  <script define:vars={{ themeModes }}>
-    const html = document.documentElement;
-    const body = document.body;
-    const status = document.querySelector('[data-theme-status]');
-    const buttons = document.querySelectorAll('[data-theme-mode]');
-    const labels = Object.fromEntries(themeModes.map((mode) => [mode.id, mode.selector]));
+  <script>
+    const palettes = {
+      light: {
+        page: "oklch(0.99 0.006 255)",
+        card: "oklch(1 0 0)",
+        text: "oklch(0.16 0.025 263)",
+        muted: "oklch(0.49 0.04 263)",
+        primary: "oklch(0.77 0.1 212.35)",
+        accent: "oklch(0.7 0.14 190)",
+        background: "oklch(0.955 0.015 255)",
+      },
+      dark: {
+        page: "oklch(0.17 0.025 263)",
+        card: "oklch(0.22 0.032 263)",
+        text: "oklch(0.96 0.018 255)",
+        muted: "oklch(0.74 0.045 255)",
+        primary: "oklch(0.77 0.1 212.35)",
+        accent: "oklch(0.72 0.14 155)",
+        background: "oklch(0.29 0.035 263)",
+      },
+      dim: {
+        page: "oklch(0.2 0.02 245)",
+        card: "oklch(0.25 0.025 245)",
+        text: "oklch(0.9 0.02 245)",
+        muted: "oklch(0.72 0.03 245)",
+        primary: "oklch(0.77 0.1 212.35)",
+        accent: "oklch(0.7 0.14 190)",
+        background: "oklch(0.25 0.025 245)",
+      },
+    }
 
-    const resetTheme = () => {
-      html.classList.remove('dark');
-      body.classList.remove('high-contrast');
-      html.removeAttribute('data-theme');
-      body.removeAttribute('data-theme');
-    };
-
-    const applyTheme = (mode) => {
-      resetTheme();
-
-      if (mode === 'html-dark') html.classList.add('dark');
-      if (mode === 'body-contrast') body.classList.add('high-contrast');
-      if (mode === 'html-dim') html.setAttribute('data-theme', 'dim');
-      if (mode === 'body-sepia') body.setAttribute('data-theme', 'sepia');
-
-      const label = labels[mode] || ':root';
-
-      if (status) status.textContent = label;
+    const demo = document.querySelector("[data-product-demo]")
+    const buttons = document.querySelectorAll("[data-preview-mode]")
+    
+    function applyPreviewMode(mode) {
+      const palette = palettes[mode] || palettes.light
+      demo?.style.setProperty("--demo-page", palette.page)
+      demo?.style.setProperty("--demo-card", palette.card)
+      demo?.style.setProperty("--demo-text", palette.text)
+      demo?.style.setProperty("--demo-muted", palette.muted)
+      demo?.style.setProperty("--demo-primary", palette.primary)
+      demo?.style.setProperty("--demo-accent", palette.accent)
+      demo?.style.setProperty("--demo-background", palette.background)
 
       for (const button of buttons) {
-        button.toggleAttribute('aria-current', button.getAttribute('data-theme-mode') === mode);
+        const isActive = button.getAttribute("data-preview-mode") === mode
+        button.classList.toggle("bg-card", isActive)
+        button.classList.toggle("shadow-sm", isActive)
       }
-    };
+    }
 
     for (const button of buttons) {
-      button.addEventListener('click', () => applyTheme(button.getAttribute('data-theme-mode') || 'default'));
+      button.addEventListener("click", () => applyPreviewMode(button.getAttribute("data-preview-mode") || "light"))
     }
+
+    applyPreviewMode("light")
   </script>
 </Layout>

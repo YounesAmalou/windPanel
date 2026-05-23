@@ -14,6 +14,6 @@ export default defineConfig({
     },
   },
   webExt: {
-    startUrls: ['http://localhost:4321/'],
+    startUrls: ['http://localhost:4321/extension-demo'],
   },
 });
