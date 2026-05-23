@@ -48,14 +48,15 @@ export function detectThemeDocument(): ThemeDocument {
   }
 
   const normalizedModes = modes.filter((mode) => hasRequiredThemeVariables(mode.values)).map(normalizeModeSelector);
+  const resolvedActiveModeId = normalizedModes.some((mode) => mode.id === activeModeId)
+    ? activeModeId
+    : normalizedModes[0]?.id || DEFAULT_MODE_ID;
 
   return {
     version: 1,
     variables: collectVariablesFromModes(normalizedModes),
     modes: normalizedModes,
-    activeModeId: normalizedModes.some((mode) => mode.id === activeModeId)
-      ? activeModeId
-      : normalizedModes[0]?.id || DEFAULT_MODE_ID,
+    activeModeId: resolvedActiveModeId,
     updatedAt: Date.now(),
   };
 }
@@ -133,7 +134,7 @@ export function watchWebsiteThemeChanges(onChange: () => void): () => void {
     const observer = new MutationObserver(schedule);
     observer.observe(target, {
       attributes: true,
-      attributeFilter: ['class', 'style', ...THEME_ATTRIBUTE_NAMES],
+      attributeFilter: ['class', ...THEME_ATTRIBUTE_NAMES],
     });
     observers.push(observer);
   };

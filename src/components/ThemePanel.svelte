@@ -238,7 +238,8 @@
   }
 
   function applyPreset(preset: ThemePreset, allModes = false): void {
-    onThemeDocumentChange(applyPresetToDocument($themeDocument, preset, { modeId: $activeModeId, allModes }));
+    const nextTheme = applyPresetToDocument($themeDocument, preset, { modeId: $activeModeId, allModes });
+    onThemeDocumentChange(nextTheme);
     showNotice('Preset applied');
   }
 
