@@ -1,0 +1,65 @@
+---
+import Layout from "@/layouts/main.astro"
+
+const isHostedDemo = import.meta.env.PUBLIC_HOSTED_DEMO === "true"
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "G-8GKG8GB0GV"
+
+if (!isHostedDemo) {
+  return Astro.redirect("/")
+}
+---
+
+<Layout title="Privacy Policy - WindPanel Demo">
+  <main class="min-h-screen bg-background text-foreground font-sans antialiased">
+    <section class="mx-auto max-w-3xl px-6 py-16">
+      <a class="text-sm font-semibold text-muted-foreground hover:text-foreground" href="/">
+        Back to WindPanel
+      </a>
+
+      <div class="mt-8 rounded-3xl border border-border bg-card p-8 shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-widest text-primary">Hosted demo privacy policy</p>
+        <h1 class="mt-3 text-4xl font-black tracking-tight text-card-foreground">Privacy Policy</h1>
+        <p class="mt-4 text-sm leading-7 text-muted-foreground">
+          This policy applies only to the hosted WindPanel demo website. The local development version does not load Google
+          Analytics unless the hosted-demo environment variables are explicitly enabled.
+        </p>
+
+        <div class="mt-8 grid gap-6 text-sm leading-7 text-muted-foreground">
+          <section>
+            <h2 class="text-lg font-extrabold text-card-foreground">Analytics usage</h2>
+            <p class="mt-2">
+              The hosted demo uses Google Analytics through Google tag <code class="font-mono text-foreground">{gaMeasurementId}</code>
+              to understand aggregate page usage, such as page views, browser/device category, approximate region, referral source,
+              and interaction timing. This helps evaluate whether the landing page and demo are useful.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-extrabold text-card-foreground">What is not collected by WindPanel</h2>
+            <p class="mt-2">
+              The hosted demo does not intentionally collect names, emails, passwords, payment information, or theme values you edit
+              in the panel. The demo does not send WindPanel presets or CSS variables to a WindPanel server.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-extrabold text-card-foreground">Google processing</h2>
+            <p class="mt-2">
+              Google may process analytics data according to its own terms and privacy practices. You can use browser privacy
+              settings, consent controls, tracking protection, or Google browser add-ons to limit analytics collection.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-extrabold text-card-foreground">Local development</h2>
+            <p class="mt-2">
+              When running the demo locally with <code class="font-mono text-foreground">astro dev</code> or
+              <code class="font-mono text-foreground">bun run dev</code>, analytics are disabled by default and this hosted-demo
+              privacy page redirects to the landing page.
+            </p>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
