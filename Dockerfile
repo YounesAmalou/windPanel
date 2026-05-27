@@ -16,6 +16,8 @@ WORKDIR /app
 COPY demo ./demo
 
 WORKDIR /app/demo
+ENV PUBLIC_HOSTED_DEMO=true
+ENV PUBLIC_GA_MEASUREMENT_ID=G-8GKG8GB0GV
 RUN bun run build
 
 FROM nginx:alpine

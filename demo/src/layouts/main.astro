@@ -6,6 +6,9 @@ type Props = {
 }
 
 const { title = "WindPanel Demo" } = Astro.props
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID
+const isHostedDemo = import.meta.env.PUBLIC_HOSTED_DEMO === "true"
+const shouldLoadAnalytics = isHostedDemo && typeof gaMeasurementId === "string" && gaMeasurementId.length > 0
 ---
 
 <html lang="en">
@@ -14,6 +17,21 @@ const { title = "WindPanel Demo" } = Astro.props
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    {
+      shouldLoadAnalytics && (
+        <>
+          <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+          <script is:inline define:vars={{ gaMeasurementId }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", gaMeasurementId);
+          </script>
+        </>
+      )
+    }
   </head>
   <body>
     <slot />

@@ -68,6 +68,8 @@ const faqs = [
     a: "Yes! It automatically detects common theme conventions (e.g., class='dark', data-theme='dim', data-color-scheme='dark') and lets you sync controls with whichever selector your website uses."
   }
 ]
+
+const isHostedDemo = import.meta.env.PUBLIC_HOSTED_DEMO === "true"
 ---
 
 <Layout title="WindPanel - Tailwind Theme Editor">
@@ -81,7 +83,7 @@ const faqs = [
       </a>
       <div class="flex items-center gap-4">
         <a class="text-sm font-semibold text-foreground hover:text-muted-foreground transition-colors" href="/embedded-demo">Embedded Demo</a>
-        <a href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer">
+        <a href="https://chromewebstore.google.com/detail/windpanel/hepmnijmdodolakjcndomnljmpnmhhmo" target="_blank" rel="noreferrer">
           <Button variant="outline" size="sm" className="hidden sm:inline-flex cursor-pointer">
             Install Extension
           </Button>
@@ -108,7 +110,7 @@ const faqs = [
           </p>
           
           <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-            <a href="https://chromewebstore.google.com/" target="_blank" rel="noreferrer" class="w-full sm:w-auto">
+            <a href="https://chromewebstore.google.com/detail/windpanel/hepmnijmdodolakjcndomnljmpnmhhmo" target="_blank" rel="noreferrer" class="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto rounded-full bg-foreground text-background hover:bg-foreground/90 font-bold cursor-pointer transition-transform hover:-translate-y-0.5">
                 Install from Chrome
               </Button>
@@ -361,7 +363,10 @@ const faqs = [
       <p class="text-xs text-muted-foreground text-center md:text-left max-w-md leading-relaxed">
         Modern theme inspection, preset saving, and oklch color tweaking workflows for standard Tailwind CSS.
       </p>
-      <a class="text-xs font-semibold text-foreground hover:underline" href="/embedded-demo">Embedded Demo</a>
+      <nav class="flex items-center gap-4 text-xs font-semibold text-foreground">
+        <a class="hover:underline" href="/embedded-demo">Embedded Demo</a>
+        {isHostedDemo && <a class="hover:underline" href="/privacy">Privacy Policy</a>}
+      </nav>
     </footer>
 
   </main>
